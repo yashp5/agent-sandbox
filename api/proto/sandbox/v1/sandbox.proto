@@ -36,6 +36,19 @@ enum ProcessSignal {
   PROCESS_SIGNAL_KILL = 3;
 }
 
+enum SnapshotMode {
+  SNAPSHOT_MODE_UNSPECIFIED = 0;
+  SNAPSHOT_MODE_AUTO = 1;
+  SNAPSHOT_MODE_DIFF = 2;
+  SNAPSHOT_MODE_FULL = 3;
+}
+
+enum InheritedSessionPolicy {
+  INHERITED_SESSION_POLICY_UNSPECIFIED = 0;
+  INHERITED_SESSION_POLICY_KEEP = 1; // copied exec processes continue in the new sandbox. Their sessions start detached and can be reached through Attach.
+  INHERITED_SESSION_POLICY_KILL = 2; // terminate inherited exec process groups during post-restore, before reporting the new sandbox ready.
+}
+
 message ResourceLimits {
   uint32 vcpus = 1; // Number of virtual CPUS
   uint32 memory_mib = 2; // Guest RAM in MiB
@@ -86,6 +99,8 @@ message Sandbox {
   google.protobuf.Timestamp last_active_at = 11;
   google.protobuf.Timestamp expires_at = 12;
   repeated ExecSession exec_sessions = 13;
+  string parent_sandbox_id = 14;
+  string source_snapshot_id = 15;
 }
 
 // page_size = 0, selects a default of 50l reject negative values or above 200
@@ -274,15 +289,48 @@ message DownloadChunk {
   bytes data = 2;
 }
 
-message SnapshotRequest {}
+message SnapshotRequest {
+  string sandbox_id = 1;
+  SnapshotMode mode = 2;
+}
 
-message SnapshotRef {}
+// id identifies a server-managed snapshot; it is not a host filesystem path.
+// mode reports the actual capture mode, FULL or DIFF.
+// base_snapshot_id identifies the base when one is required; otherwise it is empty.
+// The snapshot store retains any dependencies needed for restoration.
+// The stored metadata also records compatibility information such as CPU and Firecracker version, which the server checks during restore.
+message SnapshotRef {
+  string id = 1;
+  string source_sandbox_id = 2;
+  google.protobuf.Timestamp created_at = 3;
+  string template_id = 4;
+  ResourceLimits resources = 5;
+  SnapshotMode mode = 6;
+  string base_snapshot_id = 7;
+}
 
-message ForkRequest {}
+// Require a running parent and count > 0; enforce a server-configured maximum.
+// All children come from the same captured state.
+// Each child receives a new sandbox ID and independent writable state.
+// Return success only when all requested children are ready.
+// Resume the parent after capture; child restoration happens afterward.
+// If child creation fails partway through, clean up children created by that attempt. Cleanup cannot reverse external side effects from a child that briefly ran.
+message ForkRequest {
+  string sandbox_id = 1;
+  uint32 count = 2;
+  SnapshotMode mode = 3;
+  InheritedSessionPolicy inherited_sessions = 4;
+}
 
-message ForkResponse {}
+message ForkResponse {
+  SnapshotRef snapshot = 1;
+  repeated Sandbox children = 2;
+}
 
-message RestoreRequest {}
+message RestoreRequest {
+  string snapshot_id = 1;
+  InheritedSessionPolicy inherited_sessions = 2;
+}
 
 service SandboxService {
   rpc Create(CreateRequest) returns (Sandbox);

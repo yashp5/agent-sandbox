@@ -234,6 +234,107 @@ func (ProcessSignal) EnumDescriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{3}
 }
 
+type SnapshotMode int32
+
+const (
+	SnapshotMode_SNAPSHOT_MODE_UNSPECIFIED SnapshotMode = 0
+	SnapshotMode_SNAPSHOT_MODE_AUTO        SnapshotMode = 1
+	SnapshotMode_SNAPSHOT_MODE_DIFF        SnapshotMode = 2
+	SnapshotMode_SNAPSHOT_MODE_FULL        SnapshotMode = 3
+)
+
+// Enum value maps for SnapshotMode.
+var (
+	SnapshotMode_name = map[int32]string{
+		0: "SNAPSHOT_MODE_UNSPECIFIED",
+		1: "SNAPSHOT_MODE_AUTO",
+		2: "SNAPSHOT_MODE_DIFF",
+		3: "SNAPSHOT_MODE_FULL",
+	}
+	SnapshotMode_value = map[string]int32{
+		"SNAPSHOT_MODE_UNSPECIFIED": 0,
+		"SNAPSHOT_MODE_AUTO":        1,
+		"SNAPSHOT_MODE_DIFF":        2,
+		"SNAPSHOT_MODE_FULL":        3,
+	}
+)
+
+func (x SnapshotMode) Enum() *SnapshotMode {
+	p := new(SnapshotMode)
+	*p = x
+	return p
+}
+
+func (x SnapshotMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SnapshotMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_sandbox_v1_sandbox_proto_enumTypes[4].Descriptor()
+}
+
+func (SnapshotMode) Type() protoreflect.EnumType {
+	return &file_sandbox_v1_sandbox_proto_enumTypes[4]
+}
+
+func (x SnapshotMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SnapshotMode.Descriptor instead.
+func (SnapshotMode) EnumDescriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{4}
+}
+
+type InheritedSessionPolicy int32
+
+const (
+	InheritedSessionPolicy_INHERITED_SESSION_POLICY_UNSPECIFIED InheritedSessionPolicy = 0
+	InheritedSessionPolicy_INHERITED_SESSION_POLICY_KEEP        InheritedSessionPolicy = 1 // copied exec processes continue in the new sandbox. Their sessions start detached and can be reached through Attach.
+	InheritedSessionPolicy_INHERITED_SESSION_POLICY_KILL        InheritedSessionPolicy = 2 // terminate inherited exec process groups during post-restore, before reporting the new sandbox ready.
+)
+
+// Enum value maps for InheritedSessionPolicy.
+var (
+	InheritedSessionPolicy_name = map[int32]string{
+		0: "INHERITED_SESSION_POLICY_UNSPECIFIED",
+		1: "INHERITED_SESSION_POLICY_KEEP",
+		2: "INHERITED_SESSION_POLICY_KILL",
+	}
+	InheritedSessionPolicy_value = map[string]int32{
+		"INHERITED_SESSION_POLICY_UNSPECIFIED": 0,
+		"INHERITED_SESSION_POLICY_KEEP":        1,
+		"INHERITED_SESSION_POLICY_KILL":        2,
+	}
+)
+
+func (x InheritedSessionPolicy) Enum() *InheritedSessionPolicy {
+	p := new(InheritedSessionPolicy)
+	*p = x
+	return p
+}
+
+func (x InheritedSessionPolicy) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (InheritedSessionPolicy) Descriptor() protoreflect.EnumDescriptor {
+	return file_sandbox_v1_sandbox_proto_enumTypes[5].Descriptor()
+}
+
+func (InheritedSessionPolicy) Type() protoreflect.EnumType {
+	return &file_sandbox_v1_sandbox_proto_enumTypes[5]
+}
+
+func (x InheritedSessionPolicy) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use InheritedSessionPolicy.Descriptor instead.
+func (InheritedSessionPolicy) EnumDescriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{5}
+}
+
 type ResourceLimits struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Vcpus         uint32                 `protobuf:"varint,1,opt,name=vcpus,proto3" json:"vcpus,omitempty"`                          // Number of virtual CPUS
@@ -541,22 +642,24 @@ func (x *GetRequest) GetSandboxId() string {
 }
 
 type Sandbox struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	State         SandboxState           `protobuf:"varint,2,opt,name=state,proto3,enum=sandbox.v1.SandboxState" json:"state,omitempty"`
-	Resources     *ResourceLimits        `protobuf:"bytes,3,opt,name=resources,proto3" json:"resources,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	TemplateId    string                 `protobuf:"bytes,6,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`
-	Labels        map[string]string      `protobuf:"bytes,7,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	IdleTimeout   *durationpb.Duration   `protobuf:"bytes,8,opt,name=idle_timeout,json=idleTimeout,proto3" json:"idle_timeout,omitempty"`
-	MaxLifetime   *durationpb.Duration   `protobuf:"bytes,9,opt,name=max_lifetime,json=maxLifetime,proto3" json:"max_lifetime,omitempty"`
-	Egress        *EgressPolicy          `protobuf:"bytes,10,opt,name=egress,proto3" json:"egress,omitempty"`
-	LastActiveAt  *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=last_active_at,json=lastActiveAt,proto3" json:"last_active_at,omitempty"`
-	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	ExecSessions  []*ExecSession         `protobuf:"bytes,13,rep,name=exec_sessions,json=execSessions,proto3" json:"exec_sessions,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	State            SandboxState           `protobuf:"varint,2,opt,name=state,proto3,enum=sandbox.v1.SandboxState" json:"state,omitempty"`
+	Resources        *ResourceLimits        `protobuf:"bytes,3,opt,name=resources,proto3" json:"resources,omitempty"`
+	CreatedAt        *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt        *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	TemplateId       string                 `protobuf:"bytes,6,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`
+	Labels           map[string]string      `protobuf:"bytes,7,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	IdleTimeout      *durationpb.Duration   `protobuf:"bytes,8,opt,name=idle_timeout,json=idleTimeout,proto3" json:"idle_timeout,omitempty"`
+	MaxLifetime      *durationpb.Duration   `protobuf:"bytes,9,opt,name=max_lifetime,json=maxLifetime,proto3" json:"max_lifetime,omitempty"`
+	Egress           *EgressPolicy          `protobuf:"bytes,10,opt,name=egress,proto3" json:"egress,omitempty"`
+	LastActiveAt     *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=last_active_at,json=lastActiveAt,proto3" json:"last_active_at,omitempty"`
+	ExpiresAt        *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	ExecSessions     []*ExecSession         `protobuf:"bytes,13,rep,name=exec_sessions,json=execSessions,proto3" json:"exec_sessions,omitempty"`
+	ParentSandboxId  string                 `protobuf:"bytes,14,opt,name=parent_sandbox_id,json=parentSandboxId,proto3" json:"parent_sandbox_id,omitempty"`
+	SourceSnapshotId string                 `protobuf:"bytes,15,opt,name=source_snapshot_id,json=sourceSnapshotId,proto3" json:"source_snapshot_id,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *Sandbox) Reset() {
@@ -678,6 +781,20 @@ func (x *Sandbox) GetExecSessions() []*ExecSession {
 		return x.ExecSessions
 	}
 	return nil
+}
+
+func (x *Sandbox) GetParentSandboxId() string {
+	if x != nil {
+		return x.ParentSandboxId
+	}
+	return ""
+}
+
+func (x *Sandbox) GetSourceSnapshotId() string {
+	if x != nil {
+		return x.SourceSnapshotId
+	}
+	return ""
 }
 
 // page_size = 0, selects a default of 50l reject negative values or above 200
@@ -2449,6 +2566,8 @@ func (x *DownloadChunk) GetData() []byte {
 
 type SnapshotRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
+	Mode          SnapshotMode           `protobuf:"varint,2,opt,name=mode,proto3,enum=sandbox.v1.SnapshotMode" json:"mode,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2483,10 +2602,36 @@ func (*SnapshotRequest) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{32}
 }
 
+func (x *SnapshotRequest) GetSandboxId() string {
+	if x != nil {
+		return x.SandboxId
+	}
+	return ""
+}
+
+func (x *SnapshotRequest) GetMode() SnapshotMode {
+	if x != nil {
+		return x.Mode
+	}
+	return SnapshotMode_SNAPSHOT_MODE_UNSPECIFIED
+}
+
+// id identifies a server-managed snapshot; it is not a host filesystem path.
+// mode reports the actual capture mode, FULL or DIFF.
+// base_snapshot_id identifies the base when one is required; otherwise it is empty.
+// The snapshot store retains any dependencies needed for restoration.
+// The stored metadata also records compatibility information such as CPU and Firecracker version, which the server checks during restore.
 type SnapshotRef struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	SourceSandboxId string                 `protobuf:"bytes,2,opt,name=source_sandbox_id,json=sourceSandboxId,proto3" json:"source_sandbox_id,omitempty"`
+	CreatedAt       *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	TemplateId      string                 `protobuf:"bytes,4,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`
+	Resources       *ResourceLimits        `protobuf:"bytes,5,opt,name=resources,proto3" json:"resources,omitempty"`
+	Mode            SnapshotMode           `protobuf:"varint,6,opt,name=mode,proto3,enum=sandbox.v1.SnapshotMode" json:"mode,omitempty"`
+	BaseSnapshotId  string                 `protobuf:"bytes,7,opt,name=base_snapshot_id,json=baseSnapshotId,proto3" json:"base_snapshot_id,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *SnapshotRef) Reset() {
@@ -2519,10 +2664,69 @@ func (*SnapshotRef) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{33}
 }
 
+func (x *SnapshotRef) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *SnapshotRef) GetSourceSandboxId() string {
+	if x != nil {
+		return x.SourceSandboxId
+	}
+	return ""
+}
+
+func (x *SnapshotRef) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *SnapshotRef) GetTemplateId() string {
+	if x != nil {
+		return x.TemplateId
+	}
+	return ""
+}
+
+func (x *SnapshotRef) GetResources() *ResourceLimits {
+	if x != nil {
+		return x.Resources
+	}
+	return nil
+}
+
+func (x *SnapshotRef) GetMode() SnapshotMode {
+	if x != nil {
+		return x.Mode
+	}
+	return SnapshotMode_SNAPSHOT_MODE_UNSPECIFIED
+}
+
+func (x *SnapshotRef) GetBaseSnapshotId() string {
+	if x != nil {
+		return x.BaseSnapshotId
+	}
+	return ""
+}
+
+// Require a running parent and count > 0; enforce a server-configured maximum.
+// All children come from the same captured state.
+// Each child receives a new sandbox ID and independent writable state.
+// Return success only when all requested children are ready.
+// Resume the parent after capture; child restoration happens afterward.
+// If child creation fails partway through, clean up children created by that attempt. Cleanup cannot reverse external side effects from a child that briefly ran.
 type ForkRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	SandboxId         string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
+	Count             uint32                 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Mode              SnapshotMode           `protobuf:"varint,3,opt,name=mode,proto3,enum=sandbox.v1.SnapshotMode" json:"mode,omitempty"`
+	InheritedSessions InheritedSessionPolicy `protobuf:"varint,4,opt,name=inherited_sessions,json=inheritedSessions,proto3,enum=sandbox.v1.InheritedSessionPolicy" json:"inherited_sessions,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *ForkRequest) Reset() {
@@ -2555,8 +2759,38 @@ func (*ForkRequest) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{34}
 }
 
+func (x *ForkRequest) GetSandboxId() string {
+	if x != nil {
+		return x.SandboxId
+	}
+	return ""
+}
+
+func (x *ForkRequest) GetCount() uint32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *ForkRequest) GetMode() SnapshotMode {
+	if x != nil {
+		return x.Mode
+	}
+	return SnapshotMode_SNAPSHOT_MODE_UNSPECIFIED
+}
+
+func (x *ForkRequest) GetInheritedSessions() InheritedSessionPolicy {
+	if x != nil {
+		return x.InheritedSessions
+	}
+	return InheritedSessionPolicy_INHERITED_SESSION_POLICY_UNSPECIFIED
+}
+
 type ForkResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Snapshot      *SnapshotRef           `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	Children      []*Sandbox             `protobuf:"bytes,2,rep,name=children,proto3" json:"children,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2591,10 +2825,26 @@ func (*ForkResponse) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{35}
 }
 
+func (x *ForkResponse) GetSnapshot() *SnapshotRef {
+	if x != nil {
+		return x.Snapshot
+	}
+	return nil
+}
+
+func (x *ForkResponse) GetChildren() []*Sandbox {
+	if x != nil {
+		return x.Children
+	}
+	return nil
+}
+
 type RestoreRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	SnapshotId        string                 `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
+	InheritedSessions InheritedSessionPolicy `protobuf:"varint,2,opt,name=inherited_sessions,json=inheritedSessions,proto3,enum=sandbox.v1.InheritedSessionPolicy" json:"inherited_sessions,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *RestoreRequest) Reset() {
@@ -2625,6 +2875,20 @@ func (x *RestoreRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RestoreRequest.ProtoReflect.Descriptor instead.
 func (*RestoreRequest) Descriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *RestoreRequest) GetSnapshotId() string {
+	if x != nil {
+		return x.SnapshotId
+	}
+	return ""
+}
+
+func (x *RestoreRequest) GetInheritedSessions() InheritedSessionPolicy {
+	if x != nil {
+		return x.InheritedSessions
+	}
+	return InheritedSessionPolicy_INHERITED_SESSION_POLICY_UNSPECIFIED
 }
 
 var File_sandbox_v1_sandbox_proto protoreflect.FileDescriptor
@@ -2664,7 +2928,7 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\n" +
 	"GetRequest\x12\x1d\n" +
 	"\n" +
-	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"\xf7\x05\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"\xd1\x06\n" +
 	"\aSandbox\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12.\n" +
 	"\x05state\x18\x02 \x01(\x0e2\x18.sandbox.v1.SandboxStateR\x05state\x128\n" +
@@ -2683,7 +2947,9 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\x0elast_active_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\flastActiveAt\x129\n" +
 	"\n" +
 	"expires_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\x12<\n" +
-	"\rexec_sessions\x18\r \x03(\v2\x17.sandbox.v1.ExecSessionR\fexecSessions\x1a9\n" +
+	"\rexec_sessions\x18\r \x03(\v2\x17.sandbox.v1.ExecSessionR\fexecSessions\x12*\n" +
+	"\x11parent_sandbox_id\x18\x0e \x01(\tR\x0fparentSandboxId\x12,\n" +
+	"\x12source_snapshot_id\x18\x0f \x01(\tR\x10sourceSnapshotId\x1a9\n" +
 	"\vLabelsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x90\x02\n" +
@@ -2818,12 +3084,34 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\x04path\x18\x02 \x01(\tR\x04path\";\n" +
 	"\rDownloadChunk\x12\x16\n" +
 	"\x06offset\x18\x01 \x01(\x04R\x06offset\x12\x12\n" +
-	"\x04data\x18\x02 \x01(\fR\x04data\"\x11\n" +
-	"\x0fSnapshotRequest\"\r\n" +
-	"\vSnapshotRef\"\r\n" +
-	"\vForkRequest\"\x0e\n" +
-	"\fForkResponse\"\x10\n" +
-	"\x0eRestoreRequest*\xd0\x01\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\"^\n" +
+	"\x0fSnapshotRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12,\n" +
+	"\x04mode\x18\x02 \x01(\x0e2\x18.sandbox.v1.SnapshotModeR\x04mode\"\xb7\x02\n" +
+	"\vSnapshotRef\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12*\n" +
+	"\x11source_sandbox_id\x18\x02 \x01(\tR\x0fsourceSandboxId\x129\n" +
+	"\n" +
+	"created_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x1f\n" +
+	"\vtemplate_id\x18\x04 \x01(\tR\n" +
+	"templateId\x128\n" +
+	"\tresources\x18\x05 \x01(\v2\x1a.sandbox.v1.ResourceLimitsR\tresources\x12,\n" +
+	"\x04mode\x18\x06 \x01(\x0e2\x18.sandbox.v1.SnapshotModeR\x04mode\x12(\n" +
+	"\x10base_snapshot_id\x18\a \x01(\tR\x0ebaseSnapshotId\"\xc3\x01\n" +
+	"\vForkRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\rR\x05count\x12,\n" +
+	"\x04mode\x18\x03 \x01(\x0e2\x18.sandbox.v1.SnapshotModeR\x04mode\x12Q\n" +
+	"\x12inherited_sessions\x18\x04 \x01(\x0e2\".sandbox.v1.InheritedSessionPolicyR\x11inheritedSessions\"t\n" +
+	"\fForkResponse\x123\n" +
+	"\bsnapshot\x18\x01 \x01(\v2\x17.sandbox.v1.SnapshotRefR\bsnapshot\x12/\n" +
+	"\bchildren\x18\x02 \x03(\v2\x13.sandbox.v1.SandboxR\bchildren\"\x84\x01\n" +
+	"\x0eRestoreRequest\x12\x1f\n" +
+	"\vsnapshot_id\x18\x01 \x01(\tR\n" +
+	"snapshotId\x12Q\n" +
+	"\x12inherited_sessions\x18\x02 \x01(\x0e2\".sandbox.v1.InheritedSessionPolicyR\x11inheritedSessions*\xd0\x01\n" +
 	"\fSandboxState\x12\x1d\n" +
 	"\x19SANDBOX_STATE_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15SANDBOX_STATE_PENDING\x10\x01\x12\x19\n" +
@@ -2844,7 +3132,16 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\x1aPROCESS_SIGNAL_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18PROCESS_SIGNAL_INTERRUPT\x10\x01\x12\x1c\n" +
 	"\x18PROCESS_SIGNAL_TERMINATE\x10\x02\x12\x17\n" +
-	"\x13PROCESS_SIGNAL_KILL\x10\x032\x81\x06\n" +
+	"\x13PROCESS_SIGNAL_KILL\x10\x03*u\n" +
+	"\fSnapshotMode\x12\x1d\n" +
+	"\x19SNAPSHOT_MODE_UNSPECIFIED\x10\x00\x12\x16\n" +
+	"\x12SNAPSHOT_MODE_AUTO\x10\x01\x12\x16\n" +
+	"\x12SNAPSHOT_MODE_DIFF\x10\x02\x12\x16\n" +
+	"\x12SNAPSHOT_MODE_FULL\x10\x03*\x88\x01\n" +
+	"\x16InheritedSessionPolicy\x12(\n" +
+	"$INHERITED_SESSION_POLICY_UNSPECIFIED\x10\x00\x12!\n" +
+	"\x1dINHERITED_SESSION_POLICY_KEEP\x10\x01\x12!\n" +
+	"\x1dINHERITED_SESSION_POLICY_KILL\x10\x022\x81\x06\n" +
 	"\x0eSandboxService\x128\n" +
 	"\x06Create\x12\x19.sandbox.v1.CreateRequest\x1a\x13.sandbox.v1.Sandbox\x122\n" +
 	"\x03Get\x12\x16.sandbox.v1.GetRequest\x1a\x13.sandbox.v1.Sandbox\x129\n" +
@@ -2871,134 +3168,145 @@ func file_sandbox_v1_sandbox_proto_rawDescGZIP() []byte {
 	return file_sandbox_v1_sandbox_proto_rawDescData
 }
 
-var file_sandbox_v1_sandbox_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_sandbox_v1_sandbox_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
 var file_sandbox_v1_sandbox_proto_msgTypes = make([]protoimpl.MessageInfo, 42)
 var file_sandbox_v1_sandbox_proto_goTypes = []any{
 	(SandboxState)(0),             // 0: sandbox.v1.SandboxState
 	(NetworkProtocol)(0),          // 1: sandbox.v1.NetworkProtocol
 	(ExecSessionState)(0),         // 2: sandbox.v1.ExecSessionState
 	(ProcessSignal)(0),            // 3: sandbox.v1.ProcessSignal
-	(*ResourceLimits)(nil),        // 4: sandbox.v1.ResourceLimits
-	(*EgressRule)(nil),            // 5: sandbox.v1.EgressRule
-	(*EgressPolicy)(nil),          // 6: sandbox.v1.EgressPolicy
-	(*CreateRequest)(nil),         // 7: sandbox.v1.CreateRequest
-	(*GetRequest)(nil),            // 8: sandbox.v1.GetRequest
-	(*Sandbox)(nil),               // 9: sandbox.v1.Sandbox
-	(*ListRequest)(nil),           // 10: sandbox.v1.ListRequest
-	(*ListResponse)(nil),          // 11: sandbox.v1.ListResponse
-	(*DestroyRequest)(nil),        // 12: sandbox.v1.DestroyRequest
-	(*DestroyResponse)(nil),       // 13: sandbox.v1.DestroyResponse
-	(*KeepaliveRequest)(nil),      // 14: sandbox.v1.KeepaliveRequest
-	(*KeepaliveResponse)(nil),     // 15: sandbox.v1.KeepaliveResponse
-	(*ExecSession)(nil),           // 16: sandbox.v1.ExecSession
-	(*ExecStart)(nil),             // 17: sandbox.v1.ExecStart
-	(*ExecInput)(nil),             // 18: sandbox.v1.ExecInput
-	(*ExecStarted)(nil),           // 19: sandbox.v1.ExecStarted
-	(*OutputChunk)(nil),           // 20: sandbox.v1.OutputChunk
-	(*ExecExit)(nil),              // 21: sandbox.v1.ExecExit
-	(*StdinChunk)(nil),            // 22: sandbox.v1.StdinChunk
-	(*StdinAck)(nil),              // 23: sandbox.v1.StdinAck
-	(*ExecSignal)(nil),            // 24: sandbox.v1.ExecSignal
-	(*ExecAck)(nil),               // 25: sandbox.v1.ExecAck
-	(*AttachStart)(nil),           // 26: sandbox.v1.AttachStart
-	(*ExecAttached)(nil),          // 27: sandbox.v1.ExecAttached
-	(*AttachInput)(nil),           // 28: sandbox.v1.AttachInput
-	(*ExecOutput)(nil),            // 29: sandbox.v1.ExecOutput
-	(*UploadStart)(nil),           // 30: sandbox.v1.UploadStart
-	(*UploadData)(nil),            // 31: sandbox.v1.UploadData
-	(*UploadChunk)(nil),           // 32: sandbox.v1.UploadChunk
-	(*UploadResponse)(nil),        // 33: sandbox.v1.UploadResponse
-	(*DownloadRequest)(nil),       // 34: sandbox.v1.DownloadRequest
-	(*DownloadChunk)(nil),         // 35: sandbox.v1.DownloadChunk
-	(*SnapshotRequest)(nil),       // 36: sandbox.v1.SnapshotRequest
-	(*SnapshotRef)(nil),           // 37: sandbox.v1.SnapshotRef
-	(*ForkRequest)(nil),           // 38: sandbox.v1.ForkRequest
-	(*ForkResponse)(nil),          // 39: sandbox.v1.ForkResponse
-	(*RestoreRequest)(nil),        // 40: sandbox.v1.RestoreRequest
-	nil,                           // 41: sandbox.v1.CreateRequest.EnvEntry
-	nil,                           // 42: sandbox.v1.CreateRequest.LabelsEntry
-	nil,                           // 43: sandbox.v1.Sandbox.LabelsEntry
-	nil,                           // 44: sandbox.v1.ListRequest.LabelSelectorEntry
-	nil,                           // 45: sandbox.v1.ExecStart.EnvEntry
-	(*durationpb.Duration)(nil),   // 46: google.protobuf.Duration
-	(*timestamppb.Timestamp)(nil), // 47: google.protobuf.Timestamp
+	(SnapshotMode)(0),             // 4: sandbox.v1.SnapshotMode
+	(InheritedSessionPolicy)(0),   // 5: sandbox.v1.InheritedSessionPolicy
+	(*ResourceLimits)(nil),        // 6: sandbox.v1.ResourceLimits
+	(*EgressRule)(nil),            // 7: sandbox.v1.EgressRule
+	(*EgressPolicy)(nil),          // 8: sandbox.v1.EgressPolicy
+	(*CreateRequest)(nil),         // 9: sandbox.v1.CreateRequest
+	(*GetRequest)(nil),            // 10: sandbox.v1.GetRequest
+	(*Sandbox)(nil),               // 11: sandbox.v1.Sandbox
+	(*ListRequest)(nil),           // 12: sandbox.v1.ListRequest
+	(*ListResponse)(nil),          // 13: sandbox.v1.ListResponse
+	(*DestroyRequest)(nil),        // 14: sandbox.v1.DestroyRequest
+	(*DestroyResponse)(nil),       // 15: sandbox.v1.DestroyResponse
+	(*KeepaliveRequest)(nil),      // 16: sandbox.v1.KeepaliveRequest
+	(*KeepaliveResponse)(nil),     // 17: sandbox.v1.KeepaliveResponse
+	(*ExecSession)(nil),           // 18: sandbox.v1.ExecSession
+	(*ExecStart)(nil),             // 19: sandbox.v1.ExecStart
+	(*ExecInput)(nil),             // 20: sandbox.v1.ExecInput
+	(*ExecStarted)(nil),           // 21: sandbox.v1.ExecStarted
+	(*OutputChunk)(nil),           // 22: sandbox.v1.OutputChunk
+	(*ExecExit)(nil),              // 23: sandbox.v1.ExecExit
+	(*StdinChunk)(nil),            // 24: sandbox.v1.StdinChunk
+	(*StdinAck)(nil),              // 25: sandbox.v1.StdinAck
+	(*ExecSignal)(nil),            // 26: sandbox.v1.ExecSignal
+	(*ExecAck)(nil),               // 27: sandbox.v1.ExecAck
+	(*AttachStart)(nil),           // 28: sandbox.v1.AttachStart
+	(*ExecAttached)(nil),          // 29: sandbox.v1.ExecAttached
+	(*AttachInput)(nil),           // 30: sandbox.v1.AttachInput
+	(*ExecOutput)(nil),            // 31: sandbox.v1.ExecOutput
+	(*UploadStart)(nil),           // 32: sandbox.v1.UploadStart
+	(*UploadData)(nil),            // 33: sandbox.v1.UploadData
+	(*UploadChunk)(nil),           // 34: sandbox.v1.UploadChunk
+	(*UploadResponse)(nil),        // 35: sandbox.v1.UploadResponse
+	(*DownloadRequest)(nil),       // 36: sandbox.v1.DownloadRequest
+	(*DownloadChunk)(nil),         // 37: sandbox.v1.DownloadChunk
+	(*SnapshotRequest)(nil),       // 38: sandbox.v1.SnapshotRequest
+	(*SnapshotRef)(nil),           // 39: sandbox.v1.SnapshotRef
+	(*ForkRequest)(nil),           // 40: sandbox.v1.ForkRequest
+	(*ForkResponse)(nil),          // 41: sandbox.v1.ForkResponse
+	(*RestoreRequest)(nil),        // 42: sandbox.v1.RestoreRequest
+	nil,                           // 43: sandbox.v1.CreateRequest.EnvEntry
+	nil,                           // 44: sandbox.v1.CreateRequest.LabelsEntry
+	nil,                           // 45: sandbox.v1.Sandbox.LabelsEntry
+	nil,                           // 46: sandbox.v1.ListRequest.LabelSelectorEntry
+	nil,                           // 47: sandbox.v1.ExecStart.EnvEntry
+	(*durationpb.Duration)(nil),   // 48: google.protobuf.Duration
+	(*timestamppb.Timestamp)(nil), // 49: google.protobuf.Timestamp
 }
 var file_sandbox_v1_sandbox_proto_depIdxs = []int32{
 	1,  // 0: sandbox.v1.EgressRule.protocol:type_name -> sandbox.v1.NetworkProtocol
-	5,  // 1: sandbox.v1.EgressPolicy.allow_rules:type_name -> sandbox.v1.EgressRule
-	4,  // 2: sandbox.v1.CreateRequest.resources:type_name -> sandbox.v1.ResourceLimits
-	41, // 3: sandbox.v1.CreateRequest.env:type_name -> sandbox.v1.CreateRequest.EnvEntry
-	46, // 4: sandbox.v1.CreateRequest.idle_timeout:type_name -> google.protobuf.Duration
-	46, // 5: sandbox.v1.CreateRequest.max_lifetime:type_name -> google.protobuf.Duration
-	42, // 6: sandbox.v1.CreateRequest.labels:type_name -> sandbox.v1.CreateRequest.LabelsEntry
-	6,  // 7: sandbox.v1.CreateRequest.egress:type_name -> sandbox.v1.EgressPolicy
+	7,  // 1: sandbox.v1.EgressPolicy.allow_rules:type_name -> sandbox.v1.EgressRule
+	6,  // 2: sandbox.v1.CreateRequest.resources:type_name -> sandbox.v1.ResourceLimits
+	43, // 3: sandbox.v1.CreateRequest.env:type_name -> sandbox.v1.CreateRequest.EnvEntry
+	48, // 4: sandbox.v1.CreateRequest.idle_timeout:type_name -> google.protobuf.Duration
+	48, // 5: sandbox.v1.CreateRequest.max_lifetime:type_name -> google.protobuf.Duration
+	44, // 6: sandbox.v1.CreateRequest.labels:type_name -> sandbox.v1.CreateRequest.LabelsEntry
+	8,  // 7: sandbox.v1.CreateRequest.egress:type_name -> sandbox.v1.EgressPolicy
 	0,  // 8: sandbox.v1.Sandbox.state:type_name -> sandbox.v1.SandboxState
-	4,  // 9: sandbox.v1.Sandbox.resources:type_name -> sandbox.v1.ResourceLimits
-	47, // 10: sandbox.v1.Sandbox.created_at:type_name -> google.protobuf.Timestamp
-	47, // 11: sandbox.v1.Sandbox.updated_at:type_name -> google.protobuf.Timestamp
-	43, // 12: sandbox.v1.Sandbox.labels:type_name -> sandbox.v1.Sandbox.LabelsEntry
-	46, // 13: sandbox.v1.Sandbox.idle_timeout:type_name -> google.protobuf.Duration
-	46, // 14: sandbox.v1.Sandbox.max_lifetime:type_name -> google.protobuf.Duration
-	6,  // 15: sandbox.v1.Sandbox.egress:type_name -> sandbox.v1.EgressPolicy
-	47, // 16: sandbox.v1.Sandbox.last_active_at:type_name -> google.protobuf.Timestamp
-	47, // 17: sandbox.v1.Sandbox.expires_at:type_name -> google.protobuf.Timestamp
-	16, // 18: sandbox.v1.Sandbox.exec_sessions:type_name -> sandbox.v1.ExecSession
-	44, // 19: sandbox.v1.ListRequest.label_selector:type_name -> sandbox.v1.ListRequest.LabelSelectorEntry
+	6,  // 9: sandbox.v1.Sandbox.resources:type_name -> sandbox.v1.ResourceLimits
+	49, // 10: sandbox.v1.Sandbox.created_at:type_name -> google.protobuf.Timestamp
+	49, // 11: sandbox.v1.Sandbox.updated_at:type_name -> google.protobuf.Timestamp
+	45, // 12: sandbox.v1.Sandbox.labels:type_name -> sandbox.v1.Sandbox.LabelsEntry
+	48, // 13: sandbox.v1.Sandbox.idle_timeout:type_name -> google.protobuf.Duration
+	48, // 14: sandbox.v1.Sandbox.max_lifetime:type_name -> google.protobuf.Duration
+	8,  // 15: sandbox.v1.Sandbox.egress:type_name -> sandbox.v1.EgressPolicy
+	49, // 16: sandbox.v1.Sandbox.last_active_at:type_name -> google.protobuf.Timestamp
+	49, // 17: sandbox.v1.Sandbox.expires_at:type_name -> google.protobuf.Timestamp
+	18, // 18: sandbox.v1.Sandbox.exec_sessions:type_name -> sandbox.v1.ExecSession
+	46, // 19: sandbox.v1.ListRequest.label_selector:type_name -> sandbox.v1.ListRequest.LabelSelectorEntry
 	0,  // 20: sandbox.v1.ListRequest.states:type_name -> sandbox.v1.SandboxState
-	9,  // 21: sandbox.v1.ListResponse.sandboxes:type_name -> sandbox.v1.Sandbox
-	47, // 22: sandbox.v1.KeepaliveResponse.last_active_at:type_name -> google.protobuf.Timestamp
-	47, // 23: sandbox.v1.KeepaliveResponse.expires_at:type_name -> google.protobuf.Timestamp
+	11, // 21: sandbox.v1.ListResponse.sandboxes:type_name -> sandbox.v1.Sandbox
+	49, // 22: sandbox.v1.KeepaliveResponse.last_active_at:type_name -> google.protobuf.Timestamp
+	49, // 23: sandbox.v1.KeepaliveResponse.expires_at:type_name -> google.protobuf.Timestamp
 	2,  // 24: sandbox.v1.ExecSession.state:type_name -> sandbox.v1.ExecSessionState
-	47, // 25: sandbox.v1.ExecSession.started_at:type_name -> google.protobuf.Timestamp
-	21, // 26: sandbox.v1.ExecSession.exit:type_name -> sandbox.v1.ExecExit
-	45, // 27: sandbox.v1.ExecStart.env:type_name -> sandbox.v1.ExecStart.EnvEntry
-	46, // 28: sandbox.v1.ExecStart.timeout:type_name -> google.protobuf.Duration
-	17, // 29: sandbox.v1.ExecInput.start:type_name -> sandbox.v1.ExecStart
-	22, // 30: sandbox.v1.ExecInput.stdin:type_name -> sandbox.v1.StdinChunk
-	24, // 31: sandbox.v1.ExecInput.signal:type_name -> sandbox.v1.ExecSignal
-	25, // 32: sandbox.v1.ExecInput.ack:type_name -> sandbox.v1.ExecAck
+	49, // 25: sandbox.v1.ExecSession.started_at:type_name -> google.protobuf.Timestamp
+	23, // 26: sandbox.v1.ExecSession.exit:type_name -> sandbox.v1.ExecExit
+	47, // 27: sandbox.v1.ExecStart.env:type_name -> sandbox.v1.ExecStart.EnvEntry
+	48, // 28: sandbox.v1.ExecStart.timeout:type_name -> google.protobuf.Duration
+	19, // 29: sandbox.v1.ExecInput.start:type_name -> sandbox.v1.ExecStart
+	24, // 30: sandbox.v1.ExecInput.stdin:type_name -> sandbox.v1.StdinChunk
+	26, // 31: sandbox.v1.ExecInput.signal:type_name -> sandbox.v1.ExecSignal
+	27, // 32: sandbox.v1.ExecInput.ack:type_name -> sandbox.v1.ExecAck
 	3,  // 33: sandbox.v1.ExecSignal.signal:type_name -> sandbox.v1.ProcessSignal
-	26, // 34: sandbox.v1.AttachInput.start:type_name -> sandbox.v1.AttachStart
-	22, // 35: sandbox.v1.AttachInput.stdin:type_name -> sandbox.v1.StdinChunk
-	24, // 36: sandbox.v1.AttachInput.signal:type_name -> sandbox.v1.ExecSignal
-	25, // 37: sandbox.v1.AttachInput.ack:type_name -> sandbox.v1.ExecAck
-	19, // 38: sandbox.v1.ExecOutput.started:type_name -> sandbox.v1.ExecStarted
-	20, // 39: sandbox.v1.ExecOutput.stdout:type_name -> sandbox.v1.OutputChunk
-	20, // 40: sandbox.v1.ExecOutput.stderr:type_name -> sandbox.v1.OutputChunk
-	21, // 41: sandbox.v1.ExecOutput.exited:type_name -> sandbox.v1.ExecExit
-	23, // 42: sandbox.v1.ExecOutput.stdin_ack:type_name -> sandbox.v1.StdinAck
-	27, // 43: sandbox.v1.ExecOutput.attached:type_name -> sandbox.v1.ExecAttached
-	30, // 44: sandbox.v1.UploadChunk.start:type_name -> sandbox.v1.UploadStart
-	31, // 45: sandbox.v1.UploadChunk.data:type_name -> sandbox.v1.UploadData
-	7,  // 46: sandbox.v1.SandboxService.Create:input_type -> sandbox.v1.CreateRequest
-	8,  // 47: sandbox.v1.SandboxService.Get:input_type -> sandbox.v1.GetRequest
-	10, // 48: sandbox.v1.SandboxService.List:input_type -> sandbox.v1.ListRequest
-	12, // 49: sandbox.v1.SandboxService.Destroy:input_type -> sandbox.v1.DestroyRequest
-	14, // 50: sandbox.v1.SandboxService.Keepalive:input_type -> sandbox.v1.KeepaliveRequest
-	18, // 51: sandbox.v1.SandboxService.Exec:input_type -> sandbox.v1.ExecInput
-	28, // 52: sandbox.v1.SandboxService.Attach:input_type -> sandbox.v1.AttachInput
-	32, // 53: sandbox.v1.SandboxService.Upload:input_type -> sandbox.v1.UploadChunk
-	34, // 54: sandbox.v1.SandboxService.Download:input_type -> sandbox.v1.DownloadRequest
-	36, // 55: sandbox.v1.SandboxService.Snapshot:input_type -> sandbox.v1.SnapshotRequest
-	38, // 56: sandbox.v1.SandboxService.Fork:input_type -> sandbox.v1.ForkRequest
-	40, // 57: sandbox.v1.SandboxService.Restore:input_type -> sandbox.v1.RestoreRequest
-	9,  // 58: sandbox.v1.SandboxService.Create:output_type -> sandbox.v1.Sandbox
-	9,  // 59: sandbox.v1.SandboxService.Get:output_type -> sandbox.v1.Sandbox
-	11, // 60: sandbox.v1.SandboxService.List:output_type -> sandbox.v1.ListResponse
-	13, // 61: sandbox.v1.SandboxService.Destroy:output_type -> sandbox.v1.DestroyResponse
-	15, // 62: sandbox.v1.SandboxService.Keepalive:output_type -> sandbox.v1.KeepaliveResponse
-	29, // 63: sandbox.v1.SandboxService.Exec:output_type -> sandbox.v1.ExecOutput
-	29, // 64: sandbox.v1.SandboxService.Attach:output_type -> sandbox.v1.ExecOutput
-	33, // 65: sandbox.v1.SandboxService.Upload:output_type -> sandbox.v1.UploadResponse
-	35, // 66: sandbox.v1.SandboxService.Download:output_type -> sandbox.v1.DownloadChunk
-	37, // 67: sandbox.v1.SandboxService.Snapshot:output_type -> sandbox.v1.SnapshotRef
-	39, // 68: sandbox.v1.SandboxService.Fork:output_type -> sandbox.v1.ForkResponse
-	9,  // 69: sandbox.v1.SandboxService.Restore:output_type -> sandbox.v1.Sandbox
-	58, // [58:70] is the sub-list for method output_type
-	46, // [46:58] is the sub-list for method input_type
-	46, // [46:46] is the sub-list for extension type_name
-	46, // [46:46] is the sub-list for extension extendee
-	0,  // [0:46] is the sub-list for field type_name
+	28, // 34: sandbox.v1.AttachInput.start:type_name -> sandbox.v1.AttachStart
+	24, // 35: sandbox.v1.AttachInput.stdin:type_name -> sandbox.v1.StdinChunk
+	26, // 36: sandbox.v1.AttachInput.signal:type_name -> sandbox.v1.ExecSignal
+	27, // 37: sandbox.v1.AttachInput.ack:type_name -> sandbox.v1.ExecAck
+	21, // 38: sandbox.v1.ExecOutput.started:type_name -> sandbox.v1.ExecStarted
+	22, // 39: sandbox.v1.ExecOutput.stdout:type_name -> sandbox.v1.OutputChunk
+	22, // 40: sandbox.v1.ExecOutput.stderr:type_name -> sandbox.v1.OutputChunk
+	23, // 41: sandbox.v1.ExecOutput.exited:type_name -> sandbox.v1.ExecExit
+	25, // 42: sandbox.v1.ExecOutput.stdin_ack:type_name -> sandbox.v1.StdinAck
+	29, // 43: sandbox.v1.ExecOutput.attached:type_name -> sandbox.v1.ExecAttached
+	32, // 44: sandbox.v1.UploadChunk.start:type_name -> sandbox.v1.UploadStart
+	33, // 45: sandbox.v1.UploadChunk.data:type_name -> sandbox.v1.UploadData
+	4,  // 46: sandbox.v1.SnapshotRequest.mode:type_name -> sandbox.v1.SnapshotMode
+	49, // 47: sandbox.v1.SnapshotRef.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 48: sandbox.v1.SnapshotRef.resources:type_name -> sandbox.v1.ResourceLimits
+	4,  // 49: sandbox.v1.SnapshotRef.mode:type_name -> sandbox.v1.SnapshotMode
+	4,  // 50: sandbox.v1.ForkRequest.mode:type_name -> sandbox.v1.SnapshotMode
+	5,  // 51: sandbox.v1.ForkRequest.inherited_sessions:type_name -> sandbox.v1.InheritedSessionPolicy
+	39, // 52: sandbox.v1.ForkResponse.snapshot:type_name -> sandbox.v1.SnapshotRef
+	11, // 53: sandbox.v1.ForkResponse.children:type_name -> sandbox.v1.Sandbox
+	5,  // 54: sandbox.v1.RestoreRequest.inherited_sessions:type_name -> sandbox.v1.InheritedSessionPolicy
+	9,  // 55: sandbox.v1.SandboxService.Create:input_type -> sandbox.v1.CreateRequest
+	10, // 56: sandbox.v1.SandboxService.Get:input_type -> sandbox.v1.GetRequest
+	12, // 57: sandbox.v1.SandboxService.List:input_type -> sandbox.v1.ListRequest
+	14, // 58: sandbox.v1.SandboxService.Destroy:input_type -> sandbox.v1.DestroyRequest
+	16, // 59: sandbox.v1.SandboxService.Keepalive:input_type -> sandbox.v1.KeepaliveRequest
+	20, // 60: sandbox.v1.SandboxService.Exec:input_type -> sandbox.v1.ExecInput
+	30, // 61: sandbox.v1.SandboxService.Attach:input_type -> sandbox.v1.AttachInput
+	34, // 62: sandbox.v1.SandboxService.Upload:input_type -> sandbox.v1.UploadChunk
+	36, // 63: sandbox.v1.SandboxService.Download:input_type -> sandbox.v1.DownloadRequest
+	38, // 64: sandbox.v1.SandboxService.Snapshot:input_type -> sandbox.v1.SnapshotRequest
+	40, // 65: sandbox.v1.SandboxService.Fork:input_type -> sandbox.v1.ForkRequest
+	42, // 66: sandbox.v1.SandboxService.Restore:input_type -> sandbox.v1.RestoreRequest
+	11, // 67: sandbox.v1.SandboxService.Create:output_type -> sandbox.v1.Sandbox
+	11, // 68: sandbox.v1.SandboxService.Get:output_type -> sandbox.v1.Sandbox
+	13, // 69: sandbox.v1.SandboxService.List:output_type -> sandbox.v1.ListResponse
+	15, // 70: sandbox.v1.SandboxService.Destroy:output_type -> sandbox.v1.DestroyResponse
+	17, // 71: sandbox.v1.SandboxService.Keepalive:output_type -> sandbox.v1.KeepaliveResponse
+	31, // 72: sandbox.v1.SandboxService.Exec:output_type -> sandbox.v1.ExecOutput
+	31, // 73: sandbox.v1.SandboxService.Attach:output_type -> sandbox.v1.ExecOutput
+	35, // 74: sandbox.v1.SandboxService.Upload:output_type -> sandbox.v1.UploadResponse
+	37, // 75: sandbox.v1.SandboxService.Download:output_type -> sandbox.v1.DownloadChunk
+	39, // 76: sandbox.v1.SandboxService.Snapshot:output_type -> sandbox.v1.SnapshotRef
+	41, // 77: sandbox.v1.SandboxService.Fork:output_type -> sandbox.v1.ForkResponse
+	11, // 78: sandbox.v1.SandboxService.Restore:output_type -> sandbox.v1.Sandbox
+	67, // [67:79] is the sub-list for method output_type
+	55, // [55:67] is the sub-list for method input_type
+	55, // [55:55] is the sub-list for extension type_name
+	55, // [55:55] is the sub-list for extension extendee
+	0,  // [0:55] is the sub-list for field type_name
 }
 
 func init() { file_sandbox_v1_sandbox_proto_init() }
@@ -3040,7 +3348,7 @@ func file_sandbox_v1_sandbox_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sandbox_v1_sandbox_proto_rawDesc), len(file_sandbox_v1_sandbox_proto_rawDesc)),
-			NumEnums:      4,
+			NumEnums:      6,
 			NumMessages:   42,
 			NumExtensions: 0,
 			NumServices:   1,
