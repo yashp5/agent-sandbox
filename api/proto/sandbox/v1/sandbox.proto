@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package sandbox.v1;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/yashp5/agent-sandbox/gen/sandbox/v1;sandboxv1";
+
+enum SandboxState {
+  SANDBOX_STATE_UNSPECIFIED = 0; // default value
+  SANDBOX_STATE_PENDING = 1;
+  SANDBOX_STATE_RUNNING = 2;
+  SANDBOX_STATE_HIBERNATED = 3; // saved and running resources released
+  SANDBOX_STATE_DESTROYED = 4;
+  SANDBOX_STATE_FAILED = 5; // sandbox operation failed
+  SANDBOX_STATE_LOST = 6; // host died and live stage is gone
+}
+
+enum NetworkProtocol{
+    NETWORK_PROTOCOL_UNSPECIFIED = 0;
+    NETWORK_PROTOCOL_TCP = 1;
+    NETWORK_PROTOCOL_UDP = 2;
+}
+
+message ResourceLimits {
+  uint32 vcpus = 1; // Number of virtual CPUS
+  uint32 memory_mib = 2; // Guest RAM in MiB
+  uint32 disk_gib = 3; // Guest disk capacity in GiB
+}
+
+message EgressRule{
+    string cidr = 1;
+    uint32 port = 2;
+    NetworkProtocol protocol = 3;
+}
+
+// Missing policy or an empty list means deny all egress
+// Each rule permits its protocol, destination range, and destination port
+// Accept IPv4 CIDRs only in v1
+// Ports must be between 1 and 65535; zero does not mean "all ports."
+// Reject unspecified or unsupported protocols
+// Readme's mandatory blocks-metadata, host addresses, and other sandboxes take precedence over allow rules
+message EgressPolicy{
+    repeated EgressRule allow_rules = 1;
+}
+
+message CreateRequest {
+  string template_id = 1; // Which configured template to use
+  ResourceLimits resources = 2; // CPU, memory, and disk allocation
+  map<string, string> env = 3; // Env vars for sandbox commands
+  google.protobuf.Duration idle_timeout = 4; // Allowed inactivity before cleanup
+  google.protobuf.Duration max_lifetime = 5; // Max lifetime, even while active
+  map<string, string> labels = 6; // Caller metadata for organization/filtering
+  EgressPolicy egress = 7;
+}
+
+message GetRequest {
+  string sandbox_id = 1;
+}
+
+message Sandbox {
+  string id = 1;
+  SandboxState state = 2;
+  ResourceLimits resources = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  string template_id = 6;
+  map<string, string> labels = 7;
+  google.protobuf.Duration idle_timeout = 8;
+  google.protobuf.Duration max_lifetime = 9;
+  EgressPolicy egress = 10;
+  google.protobuf.Timestamp last_active_at = 11;
+  google.protobuf.Timestamp expires_at = 12;
+}
+
+// page_size = 0, selects a default of 50l reject negative values or above 200
+// empty page_token requests the first page
+// empty next_page_token means there are no more pages
+message ListRequest {
+    int32 page_size = 1;
+    string page_token = 2;
+    map<string, string> label_selector = 3;
+    repeated SandboxState states = 4;
+}
+
+message ListResponse {
+    repeated Sandbox sandboxes = 1;
+    string next_page_token = 2;
+}
+
+message DestroyRequest {
+    string sandbox_id = 1;
+}
+
+message DestroyResponse {}
+
+message KeepaliveRequest {
+    string sandbox_id = 2;
+}
+
+message KeepaliveResponse {
+    google.protobuf.Timestamp last_active_at = 1;
+    google.protobuf.Timestamp expires_at = 2;
+}
+
+message ExecInput {}
+
+message AttachInput {}
+
+message ExecOutput {}
+
+message UploadChunk {}
+
+message UploadResponse {}
+
+message DownloadRequest {}
+
+message DownloadChunk {}
+
+message SnapshotRequest {}
+
+message SnapshotRef {}
+
+message ForkRequest {}
+
+message ForkResponse {}
+
+message RestoreRequest {}
+
+service SandboxService {
+  rpc Create(CreateRequest) returns (Sandbox);
+  rpc Get(GetRequest) returns (Sandbox); // includes live exec sessions
+  rpc List(ListRequest) returns (ListResponse);
+  rpc Destroy(DestroyRequest) returns (DestroyResponse);
+  rpc Keepalive(KeepaliveRequest) returns (KeepaliveResponse);
+
+  // Client sends start + stdin + signals; server streams stdout/stderr chunks with byte offsets, then exit status.
+  rpc Exec(stream ExecInput) returns (stream ExecOutput);
+  // Re-attach to a live exec session from a byte offset: after a client reconnect, or in a fork child.
+  rpc Attach(stream AttachInput) returns (stream ExecOutput);
+  rpc Upload(stream UploadChunk) returns (UploadResponse);
+  rpc Download(DownloadRequest) returns (stream DownloadChunk);
+
+  rpc Snapshot(SnapshotRequest) returns (SnapshotRef); // pause, capture memory + disk, resume
+  rpc Fork(ForkRequest) returns (ForkResponse); // n live children of a running sandbox
+  rpc Restore(RestoreRequest) returns (Sandbox); // new sandbox from a stored snapshot
+}
