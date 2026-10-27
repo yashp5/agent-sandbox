@@ -1,0 +1,15 @@
+version: v2
+modules:
+  - path: api/proto
+lint:
+  use:
+    - STANDARD
+  except:
+    # The API intentionally shares Sandbox/ExecOutput and uses stream-specific
+    # names such as ExecInput and UploadChunk, as documented in README.md.
+    - RPC_REQUEST_RESPONSE_UNIQUE
+    - RPC_REQUEST_STANDARD_NAME
+    - RPC_RESPONSE_STANDARD_NAME
+breaking:
+  use:
+    - FILE

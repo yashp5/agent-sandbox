@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+# Local command binaries (generated Go sources in gen/ are checked in).
+/bin/
+
 # Test binary, built with `go test -c`
 *.test
 
