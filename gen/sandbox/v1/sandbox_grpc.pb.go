@@ -42,9 +42,7 @@ type SandboxServiceClient interface {
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	Destroy(ctx context.Context, in *DestroyRequest, opts ...grpc.CallOption) (*DestroyResponse, error)
 	Keepalive(ctx context.Context, in *KeepaliveRequest, opts ...grpc.CallOption) (*KeepaliveResponse, error)
-	// Client sends start + stdin + signals; server streams stdout/stderr chunks with byte offsets, then exit status.
 	Exec(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[ExecInput, ExecOutput], error)
-	// Re-attach to a live exec session from a byte offset: after a client reconnect, or in a fork child.
 	Attach(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[AttachInput, ExecOutput], error)
 	Upload(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadChunk, UploadResponse], error)
 	Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DownloadChunk], error)
@@ -208,9 +206,7 @@ type SandboxServiceServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Destroy(context.Context, *DestroyRequest) (*DestroyResponse, error)
 	Keepalive(context.Context, *KeepaliveRequest) (*KeepaliveResponse, error)
-	// Client sends start + stdin + signals; server streams stdout/stderr chunks with byte offsets, then exit status.
 	Exec(grpc.BidiStreamingServer[ExecInput, ExecOutput]) error
-	// Re-attach to a live exec session from a byte offset: after a client reconnect, or in a fork child.
 	Attach(grpc.BidiStreamingServer[AttachInput, ExecOutput]) error
 	Upload(grpc.ClientStreamingServer[UploadChunk, UploadResponse]) error
 	Download(*DownloadRequest, grpc.ServerStreamingServer[DownloadChunk]) error
