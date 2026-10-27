@@ -13,14 +13,14 @@ enum SandboxState {
   SANDBOX_STATE_RUNNING = 2;
   SANDBOX_STATE_HIBERNATED = 3; // saved and running resources released
   SANDBOX_STATE_DESTROYED = 4;
-  SANDBOX_STATE_FAILED = 5; // sandbox operation failed
+  SANDBOX_STATE_FAILED = 5; // sandbox lifecycle failure
   SANDBOX_STATE_LOST = 6; // host died and live stage is gone
 }
 
-enum NetworkProtocol{
-    NETWORK_PROTOCOL_UNSPECIFIED = 0;
-    NETWORK_PROTOCOL_TCP = 1;
-    NETWORK_PROTOCOL_UDP = 2;
+enum NetworkProtocol {
+  NETWORK_PROTOCOL_UNSPECIFIED = 0;
+  NETWORK_PROTOCOL_TCP = 1;
+  NETWORK_PROTOCOL_UDP = 2;
 }
 
 message ResourceLimits {
@@ -29,10 +29,10 @@ message ResourceLimits {
   uint32 disk_gib = 3; // Guest disk capacity in GiB
 }
 
-message EgressRule{
-    string cidr = 1;
-    uint32 port = 2;
-    NetworkProtocol protocol = 3;
+message EgressRule {
+  string cidr = 1;
+  uint32 port = 2;
+  NetworkProtocol protocol = 3;
 }
 
 // Missing policy or an empty list means deny all egress
@@ -41,8 +41,8 @@ message EgressRule{
 // Ports must be between 1 and 65535; zero does not mean "all ports."
 // Reject unspecified or unsupported protocols
 // Readme's mandatory blocks-metadata, host addresses, and other sandboxes take precedence over allow rules
-message EgressPolicy{
-    repeated EgressRule allow_rules = 1;
+message EgressPolicy {
+  repeated EgressRule allow_rules = 1;
 }
 
 message CreateRequest {
@@ -78,37 +78,145 @@ message Sandbox {
 // empty page_token requests the first page
 // empty next_page_token means there are no more pages
 message ListRequest {
-    int32 page_size = 1;
-    string page_token = 2;
-    map<string, string> label_selector = 3;
-    repeated SandboxState states = 4;
+  int32 page_size = 1;
+  string page_token = 2;
+  map<string, string> label_selector = 3;
+  repeated SandboxState states = 4;
 }
 
 message ListResponse {
-    repeated Sandbox sandboxes = 1;
-    string next_page_token = 2;
+  repeated Sandbox sandboxes = 1;
+  string next_page_token = 2;
 }
 
 message DestroyRequest {
-    string sandbox_id = 1;
+  string sandbox_id = 1;
 }
 
 message DestroyResponse {}
 
 message KeepaliveRequest {
-    string sandbox_id = 2;
+  string sandbox_id = 1;
 }
 
 message KeepaliveResponse {
-    google.protobuf.Timestamp last_active_at = 1;
-    google.protobuf.Timestamp expires_at = 2;
+  google.protobuf.Timestamp last_active_at = 1;
+  google.protobuf.Timestamp expires_at = 2;
 }
 
-message ExecInput {}
+message ExecStart {
+  string sandbox_id = 1; // where to run
+  string session_id = 2; // client generated unique id within that sandbox
+  repeated string argv = 3; //executable arguments
+  map<string, string> env = 4; // overrides for this command
+  string cwd = 5; // working directory inside the guest
+  string user = 6; // guest username or numeric uid
+  google.protobuf.Duration timeout = 7; // optional command timeout
+}
 
-message AttachInput {}
+message ExecInput {
+  oneof payload {
+    ExecStart start = 1;
+    StdinChunk stdin = 2;
+    ExecSignal signal = 3;
+    ExecAck ack = 4;
+  }
+}
 
-message ExecOutput {}
+message ExecStarted {
+  string session_id = 1;
+}
+
+message OutputChunk {
+  uint64 offset = 1;
+  bytes data = 2;
+}
+
+message ExecExit {
+  oneof result {
+    int32 exit_code = 1;
+    uint32 signal_number = 2;
+  }
+  bool timed_out = 3;
+  uint64 stdout_end_offset = 4;
+  uint64 stderr_end_offset = 5;
+}
+
+// Sequences start at 1 and increase by one per chunk.
+// The guest accepts chunks in order into a bounded input queue.
+// next_sequence = 4 acks acceptance of seq 1, 2, and 3. It does not mean process has consumed those bytes.
+// Retransmitted sequences below next_sequence are acks without applying them again.
+// When retransmitting, the client must resend the orignal chunk unchanged.
+// eof=true closes the process's stdin after that chunks bytes are written. Eof participates in seq too, so reconnecting cannot apply twice.
+// Closing the grpc connection does not close process stdin. Only the explicit EOF message does that.
+message StdinChunk {
+  uint64 sequence = 1;
+  bytes data = 2;
+  bool eof = 3;
+}
+
+message StdinAck {
+  uint64 next_sequence = 1;
+}
+
+enum ProcessSignal {
+  PROCESS_SIGNAL_UNSPECIFIED = 0;
+  PROCESS_SIGNAL_INTERRUPT = 1;
+  PROCESS_SIGNAL_TERMINATE = 2;
+  PROCESS_SIGNAL_KILL = 3;
+}
+
+message ExecSignal {
+  ProcessSignal signal = 1;
+}
+
+message ExecAck {
+  uint64 stdout_offset = 1;
+  uint64 stderr_offset = 2;
+  bool exit_received = 3;
+}
+
+// A reconnect should now look like this:
+//
+// Client processes stdout through byte 99.
+// Connection drops.
+// Client attaches with stdout_offset = 100.
+// Server replies with ExecAttached and its next stdin sequence.
+// Client resends any unacknowledged stdin chunks.
+// Server replays output starting at byte 100.
+message AttachStart {
+  string sandbox_id = 1;
+  string session_id = 2;
+  optional uint64 stdout_offset = 3;
+  optional uint64 stderr_offset = 4;
+}
+
+message ExecAttached {
+  string session_id = 1;
+  uint64 next_stdin_sequence = 2;
+  uint64 stdout_offset = 3;
+  uint64 stderr_offset = 4;
+}
+
+message AttachInput {
+  oneof payload {
+    AttachStart start = 1;
+    StdinChunk stdin = 2;
+    ExecSignal signal = 3;
+    ExecAck ack = 4;
+  }
+}
+
+message ExecOutput {
+  oneof payload {
+    ExecStarted started = 1;
+    OutputChunk stdout = 2;
+    OutputChunk stderr = 3;
+    ExecExit exited = 4;
+    StdinAck stdin_ack = 5;
+    ExecAttached attached = 6;
+  }
+}
 
 message UploadChunk {}
 

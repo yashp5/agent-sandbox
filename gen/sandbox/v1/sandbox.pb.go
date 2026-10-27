@@ -31,7 +31,7 @@ const (
 	SandboxState_SANDBOX_STATE_RUNNING     SandboxState = 2
 	SandboxState_SANDBOX_STATE_HIBERNATED  SandboxState = 3 // saved and running resources released
 	SandboxState_SANDBOX_STATE_DESTROYED   SandboxState = 4
-	SandboxState_SANDBOX_STATE_FAILED      SandboxState = 5 // sandbox operation failed
+	SandboxState_SANDBOX_STATE_FAILED      SandboxState = 5 // sandbox lifecycle failure
 	SandboxState_SANDBOX_STATE_LOST        SandboxState = 6 // host died and live stage is gone
 )
 
@@ -82,6 +82,107 @@ func (x SandboxState) Number() protoreflect.EnumNumber {
 // Deprecated: Use SandboxState.Descriptor instead.
 func (SandboxState) EnumDescriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{0}
+}
+
+type NetworkProtocol int32
+
+const (
+	NetworkProtocol_NETWORK_PROTOCOL_UNSPECIFIED NetworkProtocol = 0
+	NetworkProtocol_NETWORK_PROTOCOL_TCP         NetworkProtocol = 1
+	NetworkProtocol_NETWORK_PROTOCOL_UDP         NetworkProtocol = 2
+)
+
+// Enum value maps for NetworkProtocol.
+var (
+	NetworkProtocol_name = map[int32]string{
+		0: "NETWORK_PROTOCOL_UNSPECIFIED",
+		1: "NETWORK_PROTOCOL_TCP",
+		2: "NETWORK_PROTOCOL_UDP",
+	}
+	NetworkProtocol_value = map[string]int32{
+		"NETWORK_PROTOCOL_UNSPECIFIED": 0,
+		"NETWORK_PROTOCOL_TCP":         1,
+		"NETWORK_PROTOCOL_UDP":         2,
+	}
+)
+
+func (x NetworkProtocol) Enum() *NetworkProtocol {
+	p := new(NetworkProtocol)
+	*p = x
+	return p
+}
+
+func (x NetworkProtocol) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (NetworkProtocol) Descriptor() protoreflect.EnumDescriptor {
+	return file_sandbox_v1_sandbox_proto_enumTypes[1].Descriptor()
+}
+
+func (NetworkProtocol) Type() protoreflect.EnumType {
+	return &file_sandbox_v1_sandbox_proto_enumTypes[1]
+}
+
+func (x NetworkProtocol) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use NetworkProtocol.Descriptor instead.
+func (NetworkProtocol) EnumDescriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{1}
+}
+
+type ProcessSignal int32
+
+const (
+	ProcessSignal_PROCESS_SIGNAL_UNSPECIFIED ProcessSignal = 0
+	ProcessSignal_PROCESS_SIGNAL_INTERRUPT   ProcessSignal = 1
+	ProcessSignal_PROCESS_SIGNAL_TERMINATE   ProcessSignal = 2
+	ProcessSignal_PROCESS_SIGNAL_KILL        ProcessSignal = 3
+)
+
+// Enum value maps for ProcessSignal.
+var (
+	ProcessSignal_name = map[int32]string{
+		0: "PROCESS_SIGNAL_UNSPECIFIED",
+		1: "PROCESS_SIGNAL_INTERRUPT",
+		2: "PROCESS_SIGNAL_TERMINATE",
+		3: "PROCESS_SIGNAL_KILL",
+	}
+	ProcessSignal_value = map[string]int32{
+		"PROCESS_SIGNAL_UNSPECIFIED": 0,
+		"PROCESS_SIGNAL_INTERRUPT":   1,
+		"PROCESS_SIGNAL_TERMINATE":   2,
+		"PROCESS_SIGNAL_KILL":        3,
+	}
+)
+
+func (x ProcessSignal) Enum() *ProcessSignal {
+	p := new(ProcessSignal)
+	*p = x
+	return p
+}
+
+func (x ProcessSignal) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ProcessSignal) Descriptor() protoreflect.EnumDescriptor {
+	return file_sandbox_v1_sandbox_proto_enumTypes[2].Descriptor()
+}
+
+func (ProcessSignal) Type() protoreflect.EnumType {
+	return &file_sandbox_v1_sandbox_proto_enumTypes[2]
+}
+
+func (x ProcessSignal) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ProcessSignal.Descriptor instead.
+func (ProcessSignal) EnumDescriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{2}
 }
 
 type ResourceLimits struct {
@@ -144,6 +245,116 @@ func (x *ResourceLimits) GetDiskGib() uint32 {
 	return 0
 }
 
+type EgressRule struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cidr          string                 `protobuf:"bytes,1,opt,name=cidr,proto3" json:"cidr,omitempty"`
+	Port          uint32                 `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
+	Protocol      NetworkProtocol        `protobuf:"varint,3,opt,name=protocol,proto3,enum=sandbox.v1.NetworkProtocol" json:"protocol,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EgressRule) Reset() {
+	*x = EgressRule{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EgressRule) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EgressRule) ProtoMessage() {}
+
+func (x *EgressRule) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EgressRule.ProtoReflect.Descriptor instead.
+func (*EgressRule) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *EgressRule) GetCidr() string {
+	if x != nil {
+		return x.Cidr
+	}
+	return ""
+}
+
+func (x *EgressRule) GetPort() uint32 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *EgressRule) GetProtocol() NetworkProtocol {
+	if x != nil {
+		return x.Protocol
+	}
+	return NetworkProtocol_NETWORK_PROTOCOL_UNSPECIFIED
+}
+
+// Missing policy or an empty list means deny all egress
+// Each rule permits its protocol, destination range, and destination port
+// Accept IPv4 CIDRs only in v1
+// Ports must be between 1 and 65535; zero does not mean "all ports."
+// Reject unspecified or unsupported protocols
+// Readme's mandatory blocks-metadata, host addresses, and other sandboxes take precedence over allow rules
+type EgressPolicy struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AllowRules    []*EgressRule          `protobuf:"bytes,1,rep,name=allow_rules,json=allowRules,proto3" json:"allow_rules,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EgressPolicy) Reset() {
+	*x = EgressPolicy{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EgressPolicy) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EgressPolicy) ProtoMessage() {}
+
+func (x *EgressPolicy) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EgressPolicy.ProtoReflect.Descriptor instead.
+func (*EgressPolicy) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *EgressPolicy) GetAllowRules() []*EgressRule {
+	if x != nil {
+		return x.AllowRules
+	}
+	return nil
+}
+
 type CreateRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TemplateId    string                 `protobuf:"bytes,1,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`                                                 // Which configured template to use
@@ -152,13 +363,14 @@ type CreateRequest struct {
 	IdleTimeout   *durationpb.Duration   `protobuf:"bytes,4,opt,name=idle_timeout,json=idleTimeout,proto3" json:"idle_timeout,omitempty"`                                              // Allowed inactivity before cleanup
 	MaxLifetime   *durationpb.Duration   `protobuf:"bytes,5,opt,name=max_lifetime,json=maxLifetime,proto3" json:"max_lifetime,omitempty"`                                              // Max lifetime, even while active
 	Labels        map[string]string      `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // Caller metadata for organization/filtering
+	Egress        *EgressPolicy          `protobuf:"bytes,7,opt,name=egress,proto3" json:"egress,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateRequest) Reset() {
 	*x = CreateRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[1]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -170,7 +382,7 @@ func (x *CreateRequest) String() string {
 func (*CreateRequest) ProtoMessage() {}
 
 func (x *CreateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[1]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -183,7 +395,7 @@ func (x *CreateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateRequest.ProtoReflect.Descriptor instead.
 func (*CreateRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{1}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateRequest) GetTemplateId() string {
@@ -228,6 +440,13 @@ func (x *CreateRequest) GetLabels() map[string]string {
 	return nil
 }
 
+func (x *CreateRequest) GetEgress() *EgressPolicy {
+	if x != nil {
+		return x.Egress
+	}
+	return nil
+}
+
 type GetRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
@@ -237,7 +456,7 @@ type GetRequest struct {
 
 func (x *GetRequest) Reset() {
 	*x = GetRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[2]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -249,7 +468,7 @@ func (x *GetRequest) String() string {
 func (*GetRequest) ProtoMessage() {}
 
 func (x *GetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[2]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -262,7 +481,7 @@ func (x *GetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRequest.ProtoReflect.Descriptor instead.
 func (*GetRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{2}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetRequest) GetSandboxId() string {
@@ -283,13 +502,16 @@ type Sandbox struct {
 	Labels        map[string]string      `protobuf:"bytes,7,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	IdleTimeout   *durationpb.Duration   `protobuf:"bytes,8,opt,name=idle_timeout,json=idleTimeout,proto3" json:"idle_timeout,omitempty"`
 	MaxLifetime   *durationpb.Duration   `protobuf:"bytes,9,opt,name=max_lifetime,json=maxLifetime,proto3" json:"max_lifetime,omitempty"`
+	Egress        *EgressPolicy          `protobuf:"bytes,10,opt,name=egress,proto3" json:"egress,omitempty"`
+	LastActiveAt  *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=last_active_at,json=lastActiveAt,proto3" json:"last_active_at,omitempty"`
+	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Sandbox) Reset() {
 	*x = Sandbox{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[3]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -301,7 +523,7 @@ func (x *Sandbox) String() string {
 func (*Sandbox) ProtoMessage() {}
 
 func (x *Sandbox) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[3]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -314,7 +536,7 @@ func (x *Sandbox) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Sandbox.ProtoReflect.Descriptor instead.
 func (*Sandbox) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{3}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Sandbox) GetId() string {
@@ -380,15 +602,43 @@ func (x *Sandbox) GetMaxLifetime() *durationpb.Duration {
 	return nil
 }
 
+func (x *Sandbox) GetEgress() *EgressPolicy {
+	if x != nil {
+		return x.Egress
+	}
+	return nil
+}
+
+func (x *Sandbox) GetLastActiveAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastActiveAt
+	}
+	return nil
+}
+
+func (x *Sandbox) GetExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return nil
+}
+
+// page_size = 0, selects a default of 50l reject negative values or above 200
+// empty page_token requests the first page
+// empty next_page_token means there are no more pages
 type ListRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	LabelSelector map[string]string      `protobuf:"bytes,3,rep,name=label_selector,json=labelSelector,proto3" json:"label_selector,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	States        []SandboxState         `protobuf:"varint,4,rep,packed,name=states,proto3,enum=sandbox.v1.SandboxState" json:"states,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListRequest) Reset() {
 	*x = ListRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[4]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -400,7 +650,7 @@ func (x *ListRequest) String() string {
 func (*ListRequest) ProtoMessage() {}
 
 func (x *ListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[4]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -413,18 +663,48 @@ func (x *ListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRequest.ProtoReflect.Descriptor instead.
 func (*ListRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{4}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ListRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+func (x *ListRequest) GetLabelSelector() map[string]string {
+	if x != nil {
+		return x.LabelSelector
+	}
+	return nil
+}
+
+func (x *ListRequest) GetStates() []SandboxState {
+	if x != nil {
+		return x.States
+	}
+	return nil
 }
 
 type ListResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sandboxes     []*Sandbox             `protobuf:"bytes,1,rep,name=sandboxes,proto3" json:"sandboxes,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListResponse) Reset() {
 	*x = ListResponse{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[5]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -436,7 +716,7 @@ func (x *ListResponse) String() string {
 func (*ListResponse) ProtoMessage() {}
 
 func (x *ListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[5]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -449,18 +729,33 @@ func (x *ListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResponse.ProtoReflect.Descriptor instead.
 func (*ListResponse) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{5}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ListResponse) GetSandboxes() []*Sandbox {
+	if x != nil {
+		return x.Sandboxes
+	}
+	return nil
+}
+
+func (x *ListResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
 }
 
 type DestroyRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DestroyRequest) Reset() {
 	*x = DestroyRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[6]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -472,7 +767,7 @@ func (x *DestroyRequest) String() string {
 func (*DestroyRequest) ProtoMessage() {}
 
 func (x *DestroyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[6]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -485,7 +780,14 @@ func (x *DestroyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DestroyRequest.ProtoReflect.Descriptor instead.
 func (*DestroyRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{6}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *DestroyRequest) GetSandboxId() string {
+	if x != nil {
+		return x.SandboxId
+	}
+	return ""
 }
 
 type DestroyResponse struct {
@@ -496,7 +798,7 @@ type DestroyResponse struct {
 
 func (x *DestroyResponse) Reset() {
 	*x = DestroyResponse{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[7]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -508,7 +810,7 @@ func (x *DestroyResponse) String() string {
 func (*DestroyResponse) ProtoMessage() {}
 
 func (x *DestroyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[7]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -521,18 +823,19 @@ func (x *DestroyResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DestroyResponse.ProtoReflect.Descriptor instead.
 func (*DestroyResponse) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{7}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{9}
 }
 
 type KeepaliveRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *KeepaliveRequest) Reset() {
 	*x = KeepaliveRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[8]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -544,7 +847,7 @@ func (x *KeepaliveRequest) String() string {
 func (*KeepaliveRequest) ProtoMessage() {}
 
 func (x *KeepaliveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[8]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -557,18 +860,27 @@ func (x *KeepaliveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KeepaliveRequest.ProtoReflect.Descriptor instead.
 func (*KeepaliveRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{8}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *KeepaliveRequest) GetSandboxId() string {
+	if x != nil {
+		return x.SandboxId
+	}
+	return ""
 }
 
 type KeepaliveResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	LastActiveAt  *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=last_active_at,json=lastActiveAt,proto3" json:"last_active_at,omitempty"`
+	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *KeepaliveResponse) Reset() {
 	*x = KeepaliveResponse{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[9]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -580,7 +892,7 @@ func (x *KeepaliveResponse) String() string {
 func (*KeepaliveResponse) ProtoMessage() {}
 
 func (x *KeepaliveResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[9]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -593,18 +905,131 @@ func (x *KeepaliveResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KeepaliveResponse.ProtoReflect.Descriptor instead.
 func (*KeepaliveResponse) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{9}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *KeepaliveResponse) GetLastActiveAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastActiveAt
+	}
+	return nil
+}
+
+func (x *KeepaliveResponse) GetExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return nil
+}
+
+type ExecStart struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`                                              // where to run
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`                                              // client generated unique id within that sandbox
+	Argv          []string               `protobuf:"bytes,3,rep,name=argv,proto3" json:"argv,omitempty"`                                                                         //executable arguments
+	Env           map[string]string      `protobuf:"bytes,4,rep,name=env,proto3" json:"env,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // overrides for this command
+	Cwd           string                 `protobuf:"bytes,5,opt,name=cwd,proto3" json:"cwd,omitempty"`                                                                           // working directory inside the guest
+	User          string                 `protobuf:"bytes,6,opt,name=user,proto3" json:"user,omitempty"`                                                                         // guest username or numeric uid
+	Timeout       *durationpb.Duration   `protobuf:"bytes,7,opt,name=timeout,proto3" json:"timeout,omitempty"`                                                                   // optional command timeout
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExecStart) Reset() {
+	*x = ExecStart{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecStart) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecStart) ProtoMessage() {}
+
+func (x *ExecStart) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecStart.ProtoReflect.Descriptor instead.
+func (*ExecStart) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ExecStart) GetSandboxId() string {
+	if x != nil {
+		return x.SandboxId
+	}
+	return ""
+}
+
+func (x *ExecStart) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *ExecStart) GetArgv() []string {
+	if x != nil {
+		return x.Argv
+	}
+	return nil
+}
+
+func (x *ExecStart) GetEnv() map[string]string {
+	if x != nil {
+		return x.Env
+	}
+	return nil
+}
+
+func (x *ExecStart) GetCwd() string {
+	if x != nil {
+		return x.Cwd
+	}
+	return ""
+}
+
+func (x *ExecStart) GetUser() string {
+	if x != nil {
+		return x.User
+	}
+	return ""
+}
+
+func (x *ExecStart) GetTimeout() *durationpb.Duration {
+	if x != nil {
+		return x.Timeout
+	}
+	return nil
 }
 
 type ExecInput struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Payload:
+	//
+	//	*ExecInput_Start
+	//	*ExecInput_Stdin
+	//	*ExecInput_Signal
+	//	*ExecInput_Ack
+	Payload       isExecInput_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ExecInput) Reset() {
 	*x = ExecInput{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[10]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -616,7 +1041,7 @@ func (x *ExecInput) String() string {
 func (*ExecInput) ProtoMessage() {}
 
 func (x *ExecInput) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[10]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -629,18 +1054,649 @@ func (x *ExecInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecInput.ProtoReflect.Descriptor instead.
 func (*ExecInput) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{10}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ExecInput) GetPayload() isExecInput_Payload {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *ExecInput) GetStart() *ExecStart {
+	if x != nil {
+		if x, ok := x.Payload.(*ExecInput_Start); ok {
+			return x.Start
+		}
+	}
+	return nil
+}
+
+func (x *ExecInput) GetStdin() *StdinChunk {
+	if x != nil {
+		if x, ok := x.Payload.(*ExecInput_Stdin); ok {
+			return x.Stdin
+		}
+	}
+	return nil
+}
+
+func (x *ExecInput) GetSignal() *ExecSignal {
+	if x != nil {
+		if x, ok := x.Payload.(*ExecInput_Signal); ok {
+			return x.Signal
+		}
+	}
+	return nil
+}
+
+func (x *ExecInput) GetAck() *ExecAck {
+	if x != nil {
+		if x, ok := x.Payload.(*ExecInput_Ack); ok {
+			return x.Ack
+		}
+	}
+	return nil
+}
+
+type isExecInput_Payload interface {
+	isExecInput_Payload()
+}
+
+type ExecInput_Start struct {
+	Start *ExecStart `protobuf:"bytes,1,opt,name=start,proto3,oneof"`
+}
+
+type ExecInput_Stdin struct {
+	Stdin *StdinChunk `protobuf:"bytes,2,opt,name=stdin,proto3,oneof"`
+}
+
+type ExecInput_Signal struct {
+	Signal *ExecSignal `protobuf:"bytes,3,opt,name=signal,proto3,oneof"`
+}
+
+type ExecInput_Ack struct {
+	Ack *ExecAck `protobuf:"bytes,4,opt,name=ack,proto3,oneof"`
+}
+
+func (*ExecInput_Start) isExecInput_Payload() {}
+
+func (*ExecInput_Stdin) isExecInput_Payload() {}
+
+func (*ExecInput_Signal) isExecInput_Payload() {}
+
+func (*ExecInput_Ack) isExecInput_Payload() {}
+
+type ExecStarted struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExecStarted) Reset() {
+	*x = ExecStarted{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecStarted) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecStarted) ProtoMessage() {}
+
+func (x *ExecStarted) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecStarted.ProtoReflect.Descriptor instead.
+func (*ExecStarted) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ExecStarted) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+type OutputChunk struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Offset        uint64                 `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
+	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OutputChunk) Reset() {
+	*x = OutputChunk{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OutputChunk) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OutputChunk) ProtoMessage() {}
+
+func (x *OutputChunk) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OutputChunk.ProtoReflect.Descriptor instead.
+func (*OutputChunk) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *OutputChunk) GetOffset() uint64 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+func (x *OutputChunk) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type ExecExit struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Result:
+	//
+	//	*ExecExit_ExitCode
+	//	*ExecExit_SignalNumber
+	Result          isExecExit_Result `protobuf_oneof:"result"`
+	TimedOut        bool              `protobuf:"varint,3,opt,name=timed_out,json=timedOut,proto3" json:"timed_out,omitempty"`
+	StdoutEndOffset uint64            `protobuf:"varint,4,opt,name=stdout_end_offset,json=stdoutEndOffset,proto3" json:"stdout_end_offset,omitempty"`
+	StderrEndOffset uint64            `protobuf:"varint,5,opt,name=stderr_end_offset,json=stderrEndOffset,proto3" json:"stderr_end_offset,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ExecExit) Reset() {
+	*x = ExecExit{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecExit) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecExit) ProtoMessage() {}
+
+func (x *ExecExit) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecExit.ProtoReflect.Descriptor instead.
+func (*ExecExit) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ExecExit) GetResult() isExecExit_Result {
+	if x != nil {
+		return x.Result
+	}
+	return nil
+}
+
+func (x *ExecExit) GetExitCode() int32 {
+	if x != nil {
+		if x, ok := x.Result.(*ExecExit_ExitCode); ok {
+			return x.ExitCode
+		}
+	}
+	return 0
+}
+
+func (x *ExecExit) GetSignalNumber() uint32 {
+	if x != nil {
+		if x, ok := x.Result.(*ExecExit_SignalNumber); ok {
+			return x.SignalNumber
+		}
+	}
+	return 0
+}
+
+func (x *ExecExit) GetTimedOut() bool {
+	if x != nil {
+		return x.TimedOut
+	}
+	return false
+}
+
+func (x *ExecExit) GetStdoutEndOffset() uint64 {
+	if x != nil {
+		return x.StdoutEndOffset
+	}
+	return 0
+}
+
+func (x *ExecExit) GetStderrEndOffset() uint64 {
+	if x != nil {
+		return x.StderrEndOffset
+	}
+	return 0
+}
+
+type isExecExit_Result interface {
+	isExecExit_Result()
+}
+
+type ExecExit_ExitCode struct {
+	ExitCode int32 `protobuf:"varint,1,opt,name=exit_code,json=exitCode,proto3,oneof"`
+}
+
+type ExecExit_SignalNumber struct {
+	SignalNumber uint32 `protobuf:"varint,2,opt,name=signal_number,json=signalNumber,proto3,oneof"`
+}
+
+func (*ExecExit_ExitCode) isExecExit_Result() {}
+
+func (*ExecExit_SignalNumber) isExecExit_Result() {}
+
+// Sequences start at 1 and increase by one per chunk.
+// The guest accepts chunks in order into a bounded input queue.
+// next_sequence = 4 acks acceptance of seq 1, 2, and 3. It does not mean process has consumed those bytes.
+// Retransmitted sequences below next_sequence are acks without applying them again.
+// When retransmitting, the client must resend the orignal chunk unchanged.
+// eof=true closes the process's stdin after that chunks bytes are written. Eof participates in seq too, so reconnecting cannot apply twice.
+// Closing the grpc connection does not close process stdin. Only the explicit EOF message does that.
+type StdinChunk struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sequence      uint64                 `protobuf:"varint,1,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	Eof           bool                   `protobuf:"varint,3,opt,name=eof,proto3" json:"eof,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StdinChunk) Reset() {
+	*x = StdinChunk{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StdinChunk) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StdinChunk) ProtoMessage() {}
+
+func (x *StdinChunk) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StdinChunk.ProtoReflect.Descriptor instead.
+func (*StdinChunk) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *StdinChunk) GetSequence() uint64 {
+	if x != nil {
+		return x.Sequence
+	}
+	return 0
+}
+
+func (x *StdinChunk) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *StdinChunk) GetEof() bool {
+	if x != nil {
+		return x.Eof
+	}
+	return false
+}
+
+type StdinAck struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NextSequence  uint64                 `protobuf:"varint,1,opt,name=next_sequence,json=nextSequence,proto3" json:"next_sequence,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StdinAck) Reset() {
+	*x = StdinAck{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StdinAck) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StdinAck) ProtoMessage() {}
+
+func (x *StdinAck) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StdinAck.ProtoReflect.Descriptor instead.
+func (*StdinAck) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *StdinAck) GetNextSequence() uint64 {
+	if x != nil {
+		return x.NextSequence
+	}
+	return 0
+}
+
+type ExecSignal struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Signal        ProcessSignal          `protobuf:"varint,1,opt,name=signal,proto3,enum=sandbox.v1.ProcessSignal" json:"signal,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExecSignal) Reset() {
+	*x = ExecSignal{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecSignal) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecSignal) ProtoMessage() {}
+
+func (x *ExecSignal) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecSignal.ProtoReflect.Descriptor instead.
+func (*ExecSignal) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ExecSignal) GetSignal() ProcessSignal {
+	if x != nil {
+		return x.Signal
+	}
+	return ProcessSignal_PROCESS_SIGNAL_UNSPECIFIED
+}
+
+type ExecAck struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StdoutOffset  uint64                 `protobuf:"varint,1,opt,name=stdout_offset,json=stdoutOffset,proto3" json:"stdout_offset,omitempty"`
+	StderrOffset  uint64                 `protobuf:"varint,2,opt,name=stderr_offset,json=stderrOffset,proto3" json:"stderr_offset,omitempty"`
+	ExitReceived  bool                   `protobuf:"varint,3,opt,name=exit_received,json=exitReceived,proto3" json:"exit_received,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExecAck) Reset() {
+	*x = ExecAck{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecAck) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecAck) ProtoMessage() {}
+
+func (x *ExecAck) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecAck.ProtoReflect.Descriptor instead.
+func (*ExecAck) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ExecAck) GetStdoutOffset() uint64 {
+	if x != nil {
+		return x.StdoutOffset
+	}
+	return 0
+}
+
+func (x *ExecAck) GetStderrOffset() uint64 {
+	if x != nil {
+		return x.StderrOffset
+	}
+	return 0
+}
+
+func (x *ExecAck) GetExitReceived() bool {
+	if x != nil {
+		return x.ExitReceived
+	}
+	return false
+}
+
+type AttachStart struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	StdoutOffset  *uint64                `protobuf:"varint,3,opt,name=stdout_offset,json=stdoutOffset,proto3,oneof" json:"stdout_offset,omitempty"`
+	StderrOffset  *uint64                `protobuf:"varint,4,opt,name=stderr_offset,json=stderrOffset,proto3,oneof" json:"stderr_offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AttachStart) Reset() {
+	*x = AttachStart{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AttachStart) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AttachStart) ProtoMessage() {}
+
+func (x *AttachStart) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AttachStart.ProtoReflect.Descriptor instead.
+func (*AttachStart) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *AttachStart) GetSandboxId() string {
+	if x != nil {
+		return x.SandboxId
+	}
+	return ""
+}
+
+func (x *AttachStart) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *AttachStart) GetStdoutOffset() uint64 {
+	if x != nil && x.StdoutOffset != nil {
+		return *x.StdoutOffset
+	}
+	return 0
+}
+
+func (x *AttachStart) GetStderrOffset() uint64 {
+	if x != nil && x.StderrOffset != nil {
+		return *x.StderrOffset
+	}
+	return 0
+}
+
+type ExecAttached struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	SessionId         string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	NextStdinSequence uint64                 `protobuf:"varint,2,opt,name=next_stdin_sequence,json=nextStdinSequence,proto3" json:"next_stdin_sequence,omitempty"`
+	StdoutOffset      uint64                 `protobuf:"varint,3,opt,name=stdout_offset,json=stdoutOffset,proto3" json:"stdout_offset,omitempty"`
+	StderrOffset      uint64                 `protobuf:"varint,4,opt,name=stderr_offset,json=stderrOffset,proto3" json:"stderr_offset,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ExecAttached) Reset() {
+	*x = ExecAttached{}
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecAttached) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecAttached) ProtoMessage() {}
+
+func (x *ExecAttached) ProtoReflect() protoreflect.Message {
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecAttached.ProtoReflect.Descriptor instead.
+func (*ExecAttached) Descriptor() ([]byte, []int) {
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ExecAttached) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *ExecAttached) GetNextStdinSequence() uint64 {
+	if x != nil {
+		return x.NextStdinSequence
+	}
+	return 0
+}
+
+func (x *ExecAttached) GetStdoutOffset() uint64 {
+	if x != nil {
+		return x.StdoutOffset
+	}
+	return 0
+}
+
+func (x *ExecAttached) GetStderrOffset() uint64 {
+	if x != nil {
+		return x.StderrOffset
+	}
+	return 0
 }
 
 type AttachInput struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Payload:
+	//
+	//	*AttachInput_Start
+	//	*AttachInput_Stdin
+	//	*AttachInput_Signal
+	//	*AttachInput_Ack
+	Payload       isAttachInput_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AttachInput) Reset() {
 	*x = AttachInput{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[11]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -652,7 +1708,7 @@ func (x *AttachInput) String() string {
 func (*AttachInput) ProtoMessage() {}
 
 func (x *AttachInput) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[11]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -665,18 +1721,98 @@ func (x *AttachInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AttachInput.ProtoReflect.Descriptor instead.
 func (*AttachInput) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{11}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{23}
 }
 
+func (x *AttachInput) GetPayload() isAttachInput_Payload {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *AttachInput) GetStart() *AttachStart {
+	if x != nil {
+		if x, ok := x.Payload.(*AttachInput_Start); ok {
+			return x.Start
+		}
+	}
+	return nil
+}
+
+func (x *AttachInput) GetStdin() *StdinChunk {
+	if x != nil {
+		if x, ok := x.Payload.(*AttachInput_Stdin); ok {
+			return x.Stdin
+		}
+	}
+	return nil
+}
+
+func (x *AttachInput) GetSignal() *ExecSignal {
+	if x != nil {
+		if x, ok := x.Payload.(*AttachInput_Signal); ok {
+			return x.Signal
+		}
+	}
+	return nil
+}
+
+func (x *AttachInput) GetAck() *ExecAck {
+	if x != nil {
+		if x, ok := x.Payload.(*AttachInput_Ack); ok {
+			return x.Ack
+		}
+	}
+	return nil
+}
+
+type isAttachInput_Payload interface {
+	isAttachInput_Payload()
+}
+
+type AttachInput_Start struct {
+	Start *AttachStart `protobuf:"bytes,1,opt,name=start,proto3,oneof"`
+}
+
+type AttachInput_Stdin struct {
+	Stdin *StdinChunk `protobuf:"bytes,2,opt,name=stdin,proto3,oneof"`
+}
+
+type AttachInput_Signal struct {
+	Signal *ExecSignal `protobuf:"bytes,3,opt,name=signal,proto3,oneof"`
+}
+
+type AttachInput_Ack struct {
+	Ack *ExecAck `protobuf:"bytes,4,opt,name=ack,proto3,oneof"`
+}
+
+func (*AttachInput_Start) isAttachInput_Payload() {}
+
+func (*AttachInput_Stdin) isAttachInput_Payload() {}
+
+func (*AttachInput_Signal) isAttachInput_Payload() {}
+
+func (*AttachInput_Ack) isAttachInput_Payload() {}
+
 type ExecOutput struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Payload:
+	//
+	//	*ExecOutput_Started
+	//	*ExecOutput_Stdout
+	//	*ExecOutput_Stderr
+	//	*ExecOutput_Exited
+	//	*ExecOutput_StdinAck
+	//	*ExecOutput_Attached
+	Payload       isExecOutput_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ExecOutput) Reset() {
 	*x = ExecOutput{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[12]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -688,7 +1824,7 @@ func (x *ExecOutput) String() string {
 func (*ExecOutput) ProtoMessage() {}
 
 func (x *ExecOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[12]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -701,8 +1837,109 @@ func (x *ExecOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecOutput.ProtoReflect.Descriptor instead.
 func (*ExecOutput) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{12}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{24}
 }
+
+func (x *ExecOutput) GetPayload() isExecOutput_Payload {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *ExecOutput) GetStarted() *ExecStarted {
+	if x != nil {
+		if x, ok := x.Payload.(*ExecOutput_Started); ok {
+			return x.Started
+		}
+	}
+	return nil
+}
+
+func (x *ExecOutput) GetStdout() *OutputChunk {
+	if x != nil {
+		if x, ok := x.Payload.(*ExecOutput_Stdout); ok {
+			return x.Stdout
+		}
+	}
+	return nil
+}
+
+func (x *ExecOutput) GetStderr() *OutputChunk {
+	if x != nil {
+		if x, ok := x.Payload.(*ExecOutput_Stderr); ok {
+			return x.Stderr
+		}
+	}
+	return nil
+}
+
+func (x *ExecOutput) GetExited() *ExecExit {
+	if x != nil {
+		if x, ok := x.Payload.(*ExecOutput_Exited); ok {
+			return x.Exited
+		}
+	}
+	return nil
+}
+
+func (x *ExecOutput) GetStdinAck() *StdinAck {
+	if x != nil {
+		if x, ok := x.Payload.(*ExecOutput_StdinAck); ok {
+			return x.StdinAck
+		}
+	}
+	return nil
+}
+
+func (x *ExecOutput) GetAttached() *ExecAttached {
+	if x != nil {
+		if x, ok := x.Payload.(*ExecOutput_Attached); ok {
+			return x.Attached
+		}
+	}
+	return nil
+}
+
+type isExecOutput_Payload interface {
+	isExecOutput_Payload()
+}
+
+type ExecOutput_Started struct {
+	Started *ExecStarted `protobuf:"bytes,1,opt,name=started,proto3,oneof"`
+}
+
+type ExecOutput_Stdout struct {
+	Stdout *OutputChunk `protobuf:"bytes,2,opt,name=stdout,proto3,oneof"`
+}
+
+type ExecOutput_Stderr struct {
+	Stderr *OutputChunk `protobuf:"bytes,3,opt,name=stderr,proto3,oneof"`
+}
+
+type ExecOutput_Exited struct {
+	Exited *ExecExit `protobuf:"bytes,4,opt,name=exited,proto3,oneof"`
+}
+
+type ExecOutput_StdinAck struct {
+	StdinAck *StdinAck `protobuf:"bytes,5,opt,name=stdin_ack,json=stdinAck,proto3,oneof"`
+}
+
+type ExecOutput_Attached struct {
+	Attached *ExecAttached `protobuf:"bytes,6,opt,name=attached,proto3,oneof"`
+}
+
+func (*ExecOutput_Started) isExecOutput_Payload() {}
+
+func (*ExecOutput_Stdout) isExecOutput_Payload() {}
+
+func (*ExecOutput_Stderr) isExecOutput_Payload() {}
+
+func (*ExecOutput_Exited) isExecOutput_Payload() {}
+
+func (*ExecOutput_StdinAck) isExecOutput_Payload() {}
+
+func (*ExecOutput_Attached) isExecOutput_Payload() {}
 
 type UploadChunk struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -712,7 +1949,7 @@ type UploadChunk struct {
 
 func (x *UploadChunk) Reset() {
 	*x = UploadChunk{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[13]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -724,7 +1961,7 @@ func (x *UploadChunk) String() string {
 func (*UploadChunk) ProtoMessage() {}
 
 func (x *UploadChunk) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[13]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -737,7 +1974,7 @@ func (x *UploadChunk) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadChunk.ProtoReflect.Descriptor instead.
 func (*UploadChunk) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{13}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{25}
 }
 
 type UploadResponse struct {
@@ -748,7 +1985,7 @@ type UploadResponse struct {
 
 func (x *UploadResponse) Reset() {
 	*x = UploadResponse{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[14]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -760,7 +1997,7 @@ func (x *UploadResponse) String() string {
 func (*UploadResponse) ProtoMessage() {}
 
 func (x *UploadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[14]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -773,7 +2010,7 @@ func (x *UploadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadResponse.ProtoReflect.Descriptor instead.
 func (*UploadResponse) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{14}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{26}
 }
 
 type DownloadRequest struct {
@@ -784,7 +2021,7 @@ type DownloadRequest struct {
 
 func (x *DownloadRequest) Reset() {
 	*x = DownloadRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[15]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -796,7 +2033,7 @@ func (x *DownloadRequest) String() string {
 func (*DownloadRequest) ProtoMessage() {}
 
 func (x *DownloadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[15]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -809,7 +2046,7 @@ func (x *DownloadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadRequest.ProtoReflect.Descriptor instead.
 func (*DownloadRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{15}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{27}
 }
 
 type DownloadChunk struct {
@@ -820,7 +2057,7 @@ type DownloadChunk struct {
 
 func (x *DownloadChunk) Reset() {
 	*x = DownloadChunk{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[16]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -832,7 +2069,7 @@ func (x *DownloadChunk) String() string {
 func (*DownloadChunk) ProtoMessage() {}
 
 func (x *DownloadChunk) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[16]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -845,7 +2082,7 @@ func (x *DownloadChunk) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadChunk.ProtoReflect.Descriptor instead.
 func (*DownloadChunk) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{16}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{28}
 }
 
 type SnapshotRequest struct {
@@ -856,7 +2093,7 @@ type SnapshotRequest struct {
 
 func (x *SnapshotRequest) Reset() {
 	*x = SnapshotRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[17]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -868,7 +2105,7 @@ func (x *SnapshotRequest) String() string {
 func (*SnapshotRequest) ProtoMessage() {}
 
 func (x *SnapshotRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[17]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -881,7 +2118,7 @@ func (x *SnapshotRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SnapshotRequest.ProtoReflect.Descriptor instead.
 func (*SnapshotRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{17}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{29}
 }
 
 type SnapshotRef struct {
@@ -892,7 +2129,7 @@ type SnapshotRef struct {
 
 func (x *SnapshotRef) Reset() {
 	*x = SnapshotRef{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[18]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -904,7 +2141,7 @@ func (x *SnapshotRef) String() string {
 func (*SnapshotRef) ProtoMessage() {}
 
 func (x *SnapshotRef) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[18]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -917,7 +2154,7 @@ func (x *SnapshotRef) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SnapshotRef.ProtoReflect.Descriptor instead.
 func (*SnapshotRef) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{18}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{30}
 }
 
 type ForkRequest struct {
@@ -928,7 +2165,7 @@ type ForkRequest struct {
 
 func (x *ForkRequest) Reset() {
 	*x = ForkRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[19]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -940,7 +2177,7 @@ func (x *ForkRequest) String() string {
 func (*ForkRequest) ProtoMessage() {}
 
 func (x *ForkRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[19]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -953,7 +2190,7 @@ func (x *ForkRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ForkRequest.ProtoReflect.Descriptor instead.
 func (*ForkRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{19}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{31}
 }
 
 type ForkResponse struct {
@@ -964,7 +2201,7 @@ type ForkResponse struct {
 
 func (x *ForkResponse) Reset() {
 	*x = ForkResponse{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[20]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -976,7 +2213,7 @@ func (x *ForkResponse) String() string {
 func (*ForkResponse) ProtoMessage() {}
 
 func (x *ForkResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[20]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -989,7 +2226,7 @@ func (x *ForkResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ForkResponse.ProtoReflect.Descriptor instead.
 func (*ForkResponse) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{20}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{32}
 }
 
 type RestoreRequest struct {
@@ -1000,7 +2237,7 @@ type RestoreRequest struct {
 
 func (x *RestoreRequest) Reset() {
 	*x = RestoreRequest{}
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[21]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1012,7 +2249,7 @@ func (x *RestoreRequest) String() string {
 func (*RestoreRequest) ProtoMessage() {}
 
 func (x *RestoreRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sandbox_v1_sandbox_proto_msgTypes[21]
+	mi := &file_sandbox_v1_sandbox_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1025,7 +2262,7 @@ func (x *RestoreRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RestoreRequest.ProtoReflect.Descriptor instead.
 func (*RestoreRequest) Descriptor() ([]byte, []int) {
-	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{21}
+	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{33}
 }
 
 var File_sandbox_v1_sandbox_proto protoreflect.FileDescriptor
@@ -1038,7 +2275,15 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\x05vcpus\x18\x01 \x01(\rR\x05vcpus\x12\x1d\n" +
 	"\n" +
 	"memory_mib\x18\x02 \x01(\rR\tmemoryMib\x12\x19\n" +
-	"\bdisk_gib\x18\x03 \x01(\rR\adiskGib\"\xce\x03\n" +
+	"\bdisk_gib\x18\x03 \x01(\rR\adiskGib\"m\n" +
+	"\n" +
+	"EgressRule\x12\x12\n" +
+	"\x04cidr\x18\x01 \x01(\tR\x04cidr\x12\x12\n" +
+	"\x04port\x18\x02 \x01(\rR\x04port\x127\n" +
+	"\bprotocol\x18\x03 \x01(\x0e2\x1b.sandbox.v1.NetworkProtocolR\bprotocol\"G\n" +
+	"\fEgressPolicy\x127\n" +
+	"\vallow_rules\x18\x01 \x03(\v2\x16.sandbox.v1.EgressRuleR\n" +
+	"allowRules\"\x80\x04\n" +
 	"\rCreateRequest\x12\x1f\n" +
 	"\vtemplate_id\x18\x01 \x01(\tR\n" +
 	"templateId\x128\n" +
@@ -1046,7 +2291,8 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\x03env\x18\x03 \x03(\v2\".sandbox.v1.CreateRequest.EnvEntryR\x03env\x12<\n" +
 	"\fidle_timeout\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\vidleTimeout\x12<\n" +
 	"\fmax_lifetime\x18\x05 \x01(\v2\x19.google.protobuf.DurationR\vmaxLifetime\x12=\n" +
-	"\x06labels\x18\x06 \x03(\v2%.sandbox.v1.CreateRequest.LabelsEntryR\x06labels\x1a6\n" +
+	"\x06labels\x18\x06 \x03(\v2%.sandbox.v1.CreateRequest.LabelsEntryR\x06labels\x120\n" +
+	"\x06egress\x18\a \x01(\v2\x18.sandbox.v1.EgressPolicyR\x06egress\x1a6\n" +
 	"\bEnvEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a9\n" +
@@ -1056,7 +2302,7 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\n" +
 	"GetRequest\x12\x1d\n" +
 	"\n" +
-	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"\x8a\x04\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"\xb9\x05\n" +
 	"\aSandbox\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12.\n" +
 	"\x05state\x18\x02 \x01(\x0e2\x18.sandbox.v1.SandboxStateR\x05state\x128\n" +
@@ -1069,20 +2315,114 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"templateId\x127\n" +
 	"\x06labels\x18\a \x03(\v2\x1f.sandbox.v1.Sandbox.LabelsEntryR\x06labels\x12<\n" +
 	"\fidle_timeout\x18\b \x01(\v2\x19.google.protobuf.DurationR\vidleTimeout\x12<\n" +
-	"\fmax_lifetime\x18\t \x01(\v2\x19.google.protobuf.DurationR\vmaxLifetime\x1a9\n" +
+	"\fmax_lifetime\x18\t \x01(\v2\x19.google.protobuf.DurationR\vmaxLifetime\x120\n" +
+	"\x06egress\x18\n" +
+	" \x01(\v2\x18.sandbox.v1.EgressPolicyR\x06egress\x12@\n" +
+	"\x0elast_active_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\flastActiveAt\x129\n" +
+	"\n" +
+	"expires_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\x1a9\n" +
 	"\vLabelsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\r\n" +
-	"\vListRequest\"\x0e\n" +
-	"\fListResponse\"\x10\n" +
-	"\x0eDestroyRequest\"\x11\n" +
-	"\x0fDestroyResponse\"\x12\n" +
-	"\x10KeepaliveRequest\"\x13\n" +
-	"\x11KeepaliveResponse\"\v\n" +
-	"\tExecInput\"\r\n" +
-	"\vAttachInput\"\f\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x90\x02\n" +
+	"\vListRequest\x12\x1b\n" +
+	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
-	"ExecOutput\"\r\n" +
+	"page_token\x18\x02 \x01(\tR\tpageToken\x12Q\n" +
+	"\x0elabel_selector\x18\x03 \x03(\v2*.sandbox.v1.ListRequest.LabelSelectorEntryR\rlabelSelector\x120\n" +
+	"\x06states\x18\x04 \x03(\x0e2\x18.sandbox.v1.SandboxStateR\x06states\x1a@\n" +
+	"\x12LabelSelectorEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"i\n" +
+	"\fListResponse\x121\n" +
+	"\tsandboxes\x18\x01 \x03(\v2\x13.sandbox.v1.SandboxR\tsandboxes\x12&\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"/\n" +
+	"\x0eDestroyRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"\x11\n" +
+	"\x0fDestroyResponse\"1\n" +
+	"\x10KeepaliveRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"\x90\x01\n" +
+	"\x11KeepaliveResponse\x12@\n" +
+	"\x0elast_active_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\flastActiveAt\x129\n" +
+	"\n" +
+	"expires_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"\xa2\x02\n" +
+	"\tExecStart\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12\x12\n" +
+	"\x04argv\x18\x03 \x03(\tR\x04argv\x120\n" +
+	"\x03env\x18\x04 \x03(\v2\x1e.sandbox.v1.ExecStart.EnvEntryR\x03env\x12\x10\n" +
+	"\x03cwd\x18\x05 \x01(\tR\x03cwd\x12\x12\n" +
+	"\x04user\x18\x06 \x01(\tR\x04user\x123\n" +
+	"\atimeout\x18\a \x01(\v2\x19.google.protobuf.DurationR\atimeout\x1a6\n" +
+	"\bEnvEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xd0\x01\n" +
+	"\tExecInput\x12-\n" +
+	"\x05start\x18\x01 \x01(\v2\x15.sandbox.v1.ExecStartH\x00R\x05start\x12.\n" +
+	"\x05stdin\x18\x02 \x01(\v2\x16.sandbox.v1.StdinChunkH\x00R\x05stdin\x120\n" +
+	"\x06signal\x18\x03 \x01(\v2\x16.sandbox.v1.ExecSignalH\x00R\x06signal\x12'\n" +
+	"\x03ack\x18\x04 \x01(\v2\x13.sandbox.v1.ExecAckH\x00R\x03ackB\t\n" +
+	"\apayload\",\n" +
+	"\vExecStarted\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\"9\n" +
+	"\vOutputChunk\x12\x16\n" +
+	"\x06offset\x18\x01 \x01(\x04R\x06offset\x12\x12\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\"\xcf\x01\n" +
+	"\bExecExit\x12\x1d\n" +
+	"\texit_code\x18\x01 \x01(\x05H\x00R\bexitCode\x12%\n" +
+	"\rsignal_number\x18\x02 \x01(\rH\x00R\fsignalNumber\x12\x1b\n" +
+	"\ttimed_out\x18\x03 \x01(\bR\btimedOut\x12*\n" +
+	"\x11stdout_end_offset\x18\x04 \x01(\x04R\x0fstdoutEndOffset\x12*\n" +
+	"\x11stderr_end_offset\x18\x05 \x01(\x04R\x0fstderrEndOffsetB\b\n" +
+	"\x06result\"N\n" +
+	"\n" +
+	"StdinChunk\x12\x1a\n" +
+	"\bsequence\x18\x01 \x01(\x04R\bsequence\x12\x12\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\x12\x10\n" +
+	"\x03eof\x18\x03 \x01(\bR\x03eof\"/\n" +
+	"\bStdinAck\x12#\n" +
+	"\rnext_sequence\x18\x01 \x01(\x04R\fnextSequence\"?\n" +
+	"\n" +
+	"ExecSignal\x121\n" +
+	"\x06signal\x18\x01 \x01(\x0e2\x19.sandbox.v1.ProcessSignalR\x06signal\"x\n" +
+	"\aExecAck\x12#\n" +
+	"\rstdout_offset\x18\x01 \x01(\x04R\fstdoutOffset\x12#\n" +
+	"\rstderr_offset\x18\x02 \x01(\x04R\fstderrOffset\x12#\n" +
+	"\rexit_received\x18\x03 \x01(\bR\fexitReceived\"\xc3\x01\n" +
+	"\vAttachStart\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12(\n" +
+	"\rstdout_offset\x18\x03 \x01(\x04H\x00R\fstdoutOffset\x88\x01\x01\x12(\n" +
+	"\rstderr_offset\x18\x04 \x01(\x04H\x01R\fstderrOffset\x88\x01\x01B\x10\n" +
+	"\x0e_stdout_offsetB\x10\n" +
+	"\x0e_stderr_offset\"\xa7\x01\n" +
+	"\fExecAttached\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12.\n" +
+	"\x13next_stdin_sequence\x18\x02 \x01(\x04R\x11nextStdinSequence\x12#\n" +
+	"\rstdout_offset\x18\x03 \x01(\x04R\fstdoutOffset\x12#\n" +
+	"\rstderr_offset\x18\x04 \x01(\x04R\fstderrOffset\"\xd4\x01\n" +
+	"\vAttachInput\x12/\n" +
+	"\x05start\x18\x01 \x01(\v2\x17.sandbox.v1.AttachStartH\x00R\x05start\x12.\n" +
+	"\x05stdin\x18\x02 \x01(\v2\x16.sandbox.v1.StdinChunkH\x00R\x05stdin\x120\n" +
+	"\x06signal\x18\x03 \x01(\v2\x16.sandbox.v1.ExecSignalH\x00R\x06signal\x12'\n" +
+	"\x03ack\x18\x04 \x01(\v2\x13.sandbox.v1.ExecAckH\x00R\x03ackB\t\n" +
+	"\apayload\"\xcf\x02\n" +
+	"\n" +
+	"ExecOutput\x123\n" +
+	"\astarted\x18\x01 \x01(\v2\x17.sandbox.v1.ExecStartedH\x00R\astarted\x121\n" +
+	"\x06stdout\x18\x02 \x01(\v2\x17.sandbox.v1.OutputChunkH\x00R\x06stdout\x121\n" +
+	"\x06stderr\x18\x03 \x01(\v2\x17.sandbox.v1.OutputChunkH\x00R\x06stderr\x12.\n" +
+	"\x06exited\x18\x04 \x01(\v2\x14.sandbox.v1.ExecExitH\x00R\x06exited\x123\n" +
+	"\tstdin_ack\x18\x05 \x01(\v2\x14.sandbox.v1.StdinAckH\x00R\bstdinAck\x126\n" +
+	"\battached\x18\x06 \x01(\v2\x18.sandbox.v1.ExecAttachedH\x00R\battachedB\t\n" +
+	"\apayload\"\r\n" +
 	"\vUploadChunk\"\x10\n" +
 	"\x0eUploadResponse\"\x11\n" +
 	"\x0fDownloadRequest\"\x0f\n" +
@@ -1099,7 +2439,16 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\x18SANDBOX_STATE_HIBERNATED\x10\x03\x12\x1b\n" +
 	"\x17SANDBOX_STATE_DESTROYED\x10\x04\x12\x18\n" +
 	"\x14SANDBOX_STATE_FAILED\x10\x05\x12\x16\n" +
-	"\x12SANDBOX_STATE_LOST\x10\x062\x81\x06\n" +
+	"\x12SANDBOX_STATE_LOST\x10\x06*g\n" +
+	"\x0fNetworkProtocol\x12 \n" +
+	"\x1cNETWORK_PROTOCOL_UNSPECIFIED\x10\x00\x12\x18\n" +
+	"\x14NETWORK_PROTOCOL_TCP\x10\x01\x12\x18\n" +
+	"\x14NETWORK_PROTOCOL_UDP\x10\x02*\x84\x01\n" +
+	"\rProcessSignal\x12\x1e\n" +
+	"\x1aPROCESS_SIGNAL_UNSPECIFIED\x10\x00\x12\x1c\n" +
+	"\x18PROCESS_SIGNAL_INTERRUPT\x10\x01\x12\x1c\n" +
+	"\x18PROCESS_SIGNAL_TERMINATE\x10\x02\x12\x17\n" +
+	"\x13PROCESS_SIGNAL_KILL\x10\x032\x81\x06\n" +
 	"\x0eSandboxService\x128\n" +
 	"\x06Create\x12\x19.sandbox.v1.CreateRequest\x1a\x13.sandbox.v1.Sandbox\x122\n" +
 	"\x03Get\x12\x16.sandbox.v1.GetRequest\x1a\x13.sandbox.v1.Sandbox\x129\n" +
@@ -1126,80 +2475,124 @@ func file_sandbox_v1_sandbox_proto_rawDescGZIP() []byte {
 	return file_sandbox_v1_sandbox_proto_rawDescData
 }
 
-var file_sandbox_v1_sandbox_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_sandbox_v1_sandbox_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_sandbox_v1_sandbox_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_sandbox_v1_sandbox_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
 var file_sandbox_v1_sandbox_proto_goTypes = []any{
 	(SandboxState)(0),             // 0: sandbox.v1.SandboxState
-	(*ResourceLimits)(nil),        // 1: sandbox.v1.ResourceLimits
-	(*CreateRequest)(nil),         // 2: sandbox.v1.CreateRequest
-	(*GetRequest)(nil),            // 3: sandbox.v1.GetRequest
-	(*Sandbox)(nil),               // 4: sandbox.v1.Sandbox
-	(*ListRequest)(nil),           // 5: sandbox.v1.ListRequest
-	(*ListResponse)(nil),          // 6: sandbox.v1.ListResponse
-	(*DestroyRequest)(nil),        // 7: sandbox.v1.DestroyRequest
-	(*DestroyResponse)(nil),       // 8: sandbox.v1.DestroyResponse
-	(*KeepaliveRequest)(nil),      // 9: sandbox.v1.KeepaliveRequest
-	(*KeepaliveResponse)(nil),     // 10: sandbox.v1.KeepaliveResponse
-	(*ExecInput)(nil),             // 11: sandbox.v1.ExecInput
-	(*AttachInput)(nil),           // 12: sandbox.v1.AttachInput
-	(*ExecOutput)(nil),            // 13: sandbox.v1.ExecOutput
-	(*UploadChunk)(nil),           // 14: sandbox.v1.UploadChunk
-	(*UploadResponse)(nil),        // 15: sandbox.v1.UploadResponse
-	(*DownloadRequest)(nil),       // 16: sandbox.v1.DownloadRequest
-	(*DownloadChunk)(nil),         // 17: sandbox.v1.DownloadChunk
-	(*SnapshotRequest)(nil),       // 18: sandbox.v1.SnapshotRequest
-	(*SnapshotRef)(nil),           // 19: sandbox.v1.SnapshotRef
-	(*ForkRequest)(nil),           // 20: sandbox.v1.ForkRequest
-	(*ForkResponse)(nil),          // 21: sandbox.v1.ForkResponse
-	(*RestoreRequest)(nil),        // 22: sandbox.v1.RestoreRequest
-	nil,                           // 23: sandbox.v1.CreateRequest.EnvEntry
-	nil,                           // 24: sandbox.v1.CreateRequest.LabelsEntry
-	nil,                           // 25: sandbox.v1.Sandbox.LabelsEntry
-	(*durationpb.Duration)(nil),   // 26: google.protobuf.Duration
-	(*timestamppb.Timestamp)(nil), // 27: google.protobuf.Timestamp
+	(NetworkProtocol)(0),          // 1: sandbox.v1.NetworkProtocol
+	(ProcessSignal)(0),            // 2: sandbox.v1.ProcessSignal
+	(*ResourceLimits)(nil),        // 3: sandbox.v1.ResourceLimits
+	(*EgressRule)(nil),            // 4: sandbox.v1.EgressRule
+	(*EgressPolicy)(nil),          // 5: sandbox.v1.EgressPolicy
+	(*CreateRequest)(nil),         // 6: sandbox.v1.CreateRequest
+	(*GetRequest)(nil),            // 7: sandbox.v1.GetRequest
+	(*Sandbox)(nil),               // 8: sandbox.v1.Sandbox
+	(*ListRequest)(nil),           // 9: sandbox.v1.ListRequest
+	(*ListResponse)(nil),          // 10: sandbox.v1.ListResponse
+	(*DestroyRequest)(nil),        // 11: sandbox.v1.DestroyRequest
+	(*DestroyResponse)(nil),       // 12: sandbox.v1.DestroyResponse
+	(*KeepaliveRequest)(nil),      // 13: sandbox.v1.KeepaliveRequest
+	(*KeepaliveResponse)(nil),     // 14: sandbox.v1.KeepaliveResponse
+	(*ExecStart)(nil),             // 15: sandbox.v1.ExecStart
+	(*ExecInput)(nil),             // 16: sandbox.v1.ExecInput
+	(*ExecStarted)(nil),           // 17: sandbox.v1.ExecStarted
+	(*OutputChunk)(nil),           // 18: sandbox.v1.OutputChunk
+	(*ExecExit)(nil),              // 19: sandbox.v1.ExecExit
+	(*StdinChunk)(nil),            // 20: sandbox.v1.StdinChunk
+	(*StdinAck)(nil),              // 21: sandbox.v1.StdinAck
+	(*ExecSignal)(nil),            // 22: sandbox.v1.ExecSignal
+	(*ExecAck)(nil),               // 23: sandbox.v1.ExecAck
+	(*AttachStart)(nil),           // 24: sandbox.v1.AttachStart
+	(*ExecAttached)(nil),          // 25: sandbox.v1.ExecAttached
+	(*AttachInput)(nil),           // 26: sandbox.v1.AttachInput
+	(*ExecOutput)(nil),            // 27: sandbox.v1.ExecOutput
+	(*UploadChunk)(nil),           // 28: sandbox.v1.UploadChunk
+	(*UploadResponse)(nil),        // 29: sandbox.v1.UploadResponse
+	(*DownloadRequest)(nil),       // 30: sandbox.v1.DownloadRequest
+	(*DownloadChunk)(nil),         // 31: sandbox.v1.DownloadChunk
+	(*SnapshotRequest)(nil),       // 32: sandbox.v1.SnapshotRequest
+	(*SnapshotRef)(nil),           // 33: sandbox.v1.SnapshotRef
+	(*ForkRequest)(nil),           // 34: sandbox.v1.ForkRequest
+	(*ForkResponse)(nil),          // 35: sandbox.v1.ForkResponse
+	(*RestoreRequest)(nil),        // 36: sandbox.v1.RestoreRequest
+	nil,                           // 37: sandbox.v1.CreateRequest.EnvEntry
+	nil,                           // 38: sandbox.v1.CreateRequest.LabelsEntry
+	nil,                           // 39: sandbox.v1.Sandbox.LabelsEntry
+	nil,                           // 40: sandbox.v1.ListRequest.LabelSelectorEntry
+	nil,                           // 41: sandbox.v1.ExecStart.EnvEntry
+	(*durationpb.Duration)(nil),   // 42: google.protobuf.Duration
+	(*timestamppb.Timestamp)(nil), // 43: google.protobuf.Timestamp
 }
 var file_sandbox_v1_sandbox_proto_depIdxs = []int32{
-	1,  // 0: sandbox.v1.CreateRequest.resources:type_name -> sandbox.v1.ResourceLimits
-	23, // 1: sandbox.v1.CreateRequest.env:type_name -> sandbox.v1.CreateRequest.EnvEntry
-	26, // 2: sandbox.v1.CreateRequest.idle_timeout:type_name -> google.protobuf.Duration
-	26, // 3: sandbox.v1.CreateRequest.max_lifetime:type_name -> google.protobuf.Duration
-	24, // 4: sandbox.v1.CreateRequest.labels:type_name -> sandbox.v1.CreateRequest.LabelsEntry
-	0,  // 5: sandbox.v1.Sandbox.state:type_name -> sandbox.v1.SandboxState
-	1,  // 6: sandbox.v1.Sandbox.resources:type_name -> sandbox.v1.ResourceLimits
-	27, // 7: sandbox.v1.Sandbox.created_at:type_name -> google.protobuf.Timestamp
-	27, // 8: sandbox.v1.Sandbox.updated_at:type_name -> google.protobuf.Timestamp
-	25, // 9: sandbox.v1.Sandbox.labels:type_name -> sandbox.v1.Sandbox.LabelsEntry
-	26, // 10: sandbox.v1.Sandbox.idle_timeout:type_name -> google.protobuf.Duration
-	26, // 11: sandbox.v1.Sandbox.max_lifetime:type_name -> google.protobuf.Duration
-	2,  // 12: sandbox.v1.SandboxService.Create:input_type -> sandbox.v1.CreateRequest
-	3,  // 13: sandbox.v1.SandboxService.Get:input_type -> sandbox.v1.GetRequest
-	5,  // 14: sandbox.v1.SandboxService.List:input_type -> sandbox.v1.ListRequest
-	7,  // 15: sandbox.v1.SandboxService.Destroy:input_type -> sandbox.v1.DestroyRequest
-	9,  // 16: sandbox.v1.SandboxService.Keepalive:input_type -> sandbox.v1.KeepaliveRequest
-	11, // 17: sandbox.v1.SandboxService.Exec:input_type -> sandbox.v1.ExecInput
-	12, // 18: sandbox.v1.SandboxService.Attach:input_type -> sandbox.v1.AttachInput
-	14, // 19: sandbox.v1.SandboxService.Upload:input_type -> sandbox.v1.UploadChunk
-	16, // 20: sandbox.v1.SandboxService.Download:input_type -> sandbox.v1.DownloadRequest
-	18, // 21: sandbox.v1.SandboxService.Snapshot:input_type -> sandbox.v1.SnapshotRequest
-	20, // 22: sandbox.v1.SandboxService.Fork:input_type -> sandbox.v1.ForkRequest
-	22, // 23: sandbox.v1.SandboxService.Restore:input_type -> sandbox.v1.RestoreRequest
-	4,  // 24: sandbox.v1.SandboxService.Create:output_type -> sandbox.v1.Sandbox
-	4,  // 25: sandbox.v1.SandboxService.Get:output_type -> sandbox.v1.Sandbox
-	6,  // 26: sandbox.v1.SandboxService.List:output_type -> sandbox.v1.ListResponse
-	8,  // 27: sandbox.v1.SandboxService.Destroy:output_type -> sandbox.v1.DestroyResponse
-	10, // 28: sandbox.v1.SandboxService.Keepalive:output_type -> sandbox.v1.KeepaliveResponse
-	13, // 29: sandbox.v1.SandboxService.Exec:output_type -> sandbox.v1.ExecOutput
-	13, // 30: sandbox.v1.SandboxService.Attach:output_type -> sandbox.v1.ExecOutput
-	15, // 31: sandbox.v1.SandboxService.Upload:output_type -> sandbox.v1.UploadResponse
-	17, // 32: sandbox.v1.SandboxService.Download:output_type -> sandbox.v1.DownloadChunk
-	19, // 33: sandbox.v1.SandboxService.Snapshot:output_type -> sandbox.v1.SnapshotRef
-	21, // 34: sandbox.v1.SandboxService.Fork:output_type -> sandbox.v1.ForkResponse
-	4,  // 35: sandbox.v1.SandboxService.Restore:output_type -> sandbox.v1.Sandbox
-	24, // [24:36] is the sub-list for method output_type
-	12, // [12:24] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	1,  // 0: sandbox.v1.EgressRule.protocol:type_name -> sandbox.v1.NetworkProtocol
+	4,  // 1: sandbox.v1.EgressPolicy.allow_rules:type_name -> sandbox.v1.EgressRule
+	3,  // 2: sandbox.v1.CreateRequest.resources:type_name -> sandbox.v1.ResourceLimits
+	37, // 3: sandbox.v1.CreateRequest.env:type_name -> sandbox.v1.CreateRequest.EnvEntry
+	42, // 4: sandbox.v1.CreateRequest.idle_timeout:type_name -> google.protobuf.Duration
+	42, // 5: sandbox.v1.CreateRequest.max_lifetime:type_name -> google.protobuf.Duration
+	38, // 6: sandbox.v1.CreateRequest.labels:type_name -> sandbox.v1.CreateRequest.LabelsEntry
+	5,  // 7: sandbox.v1.CreateRequest.egress:type_name -> sandbox.v1.EgressPolicy
+	0,  // 8: sandbox.v1.Sandbox.state:type_name -> sandbox.v1.SandboxState
+	3,  // 9: sandbox.v1.Sandbox.resources:type_name -> sandbox.v1.ResourceLimits
+	43, // 10: sandbox.v1.Sandbox.created_at:type_name -> google.protobuf.Timestamp
+	43, // 11: sandbox.v1.Sandbox.updated_at:type_name -> google.protobuf.Timestamp
+	39, // 12: sandbox.v1.Sandbox.labels:type_name -> sandbox.v1.Sandbox.LabelsEntry
+	42, // 13: sandbox.v1.Sandbox.idle_timeout:type_name -> google.protobuf.Duration
+	42, // 14: sandbox.v1.Sandbox.max_lifetime:type_name -> google.protobuf.Duration
+	5,  // 15: sandbox.v1.Sandbox.egress:type_name -> sandbox.v1.EgressPolicy
+	43, // 16: sandbox.v1.Sandbox.last_active_at:type_name -> google.protobuf.Timestamp
+	43, // 17: sandbox.v1.Sandbox.expires_at:type_name -> google.protobuf.Timestamp
+	40, // 18: sandbox.v1.ListRequest.label_selector:type_name -> sandbox.v1.ListRequest.LabelSelectorEntry
+	0,  // 19: sandbox.v1.ListRequest.states:type_name -> sandbox.v1.SandboxState
+	8,  // 20: sandbox.v1.ListResponse.sandboxes:type_name -> sandbox.v1.Sandbox
+	43, // 21: sandbox.v1.KeepaliveResponse.last_active_at:type_name -> google.protobuf.Timestamp
+	43, // 22: sandbox.v1.KeepaliveResponse.expires_at:type_name -> google.protobuf.Timestamp
+	41, // 23: sandbox.v1.ExecStart.env:type_name -> sandbox.v1.ExecStart.EnvEntry
+	42, // 24: sandbox.v1.ExecStart.timeout:type_name -> google.protobuf.Duration
+	15, // 25: sandbox.v1.ExecInput.start:type_name -> sandbox.v1.ExecStart
+	20, // 26: sandbox.v1.ExecInput.stdin:type_name -> sandbox.v1.StdinChunk
+	22, // 27: sandbox.v1.ExecInput.signal:type_name -> sandbox.v1.ExecSignal
+	23, // 28: sandbox.v1.ExecInput.ack:type_name -> sandbox.v1.ExecAck
+	2,  // 29: sandbox.v1.ExecSignal.signal:type_name -> sandbox.v1.ProcessSignal
+	24, // 30: sandbox.v1.AttachInput.start:type_name -> sandbox.v1.AttachStart
+	20, // 31: sandbox.v1.AttachInput.stdin:type_name -> sandbox.v1.StdinChunk
+	22, // 32: sandbox.v1.AttachInput.signal:type_name -> sandbox.v1.ExecSignal
+	23, // 33: sandbox.v1.AttachInput.ack:type_name -> sandbox.v1.ExecAck
+	17, // 34: sandbox.v1.ExecOutput.started:type_name -> sandbox.v1.ExecStarted
+	18, // 35: sandbox.v1.ExecOutput.stdout:type_name -> sandbox.v1.OutputChunk
+	18, // 36: sandbox.v1.ExecOutput.stderr:type_name -> sandbox.v1.OutputChunk
+	19, // 37: sandbox.v1.ExecOutput.exited:type_name -> sandbox.v1.ExecExit
+	21, // 38: sandbox.v1.ExecOutput.stdin_ack:type_name -> sandbox.v1.StdinAck
+	25, // 39: sandbox.v1.ExecOutput.attached:type_name -> sandbox.v1.ExecAttached
+	6,  // 40: sandbox.v1.SandboxService.Create:input_type -> sandbox.v1.CreateRequest
+	7,  // 41: sandbox.v1.SandboxService.Get:input_type -> sandbox.v1.GetRequest
+	9,  // 42: sandbox.v1.SandboxService.List:input_type -> sandbox.v1.ListRequest
+	11, // 43: sandbox.v1.SandboxService.Destroy:input_type -> sandbox.v1.DestroyRequest
+	13, // 44: sandbox.v1.SandboxService.Keepalive:input_type -> sandbox.v1.KeepaliveRequest
+	16, // 45: sandbox.v1.SandboxService.Exec:input_type -> sandbox.v1.ExecInput
+	26, // 46: sandbox.v1.SandboxService.Attach:input_type -> sandbox.v1.AttachInput
+	28, // 47: sandbox.v1.SandboxService.Upload:input_type -> sandbox.v1.UploadChunk
+	30, // 48: sandbox.v1.SandboxService.Download:input_type -> sandbox.v1.DownloadRequest
+	32, // 49: sandbox.v1.SandboxService.Snapshot:input_type -> sandbox.v1.SnapshotRequest
+	34, // 50: sandbox.v1.SandboxService.Fork:input_type -> sandbox.v1.ForkRequest
+	36, // 51: sandbox.v1.SandboxService.Restore:input_type -> sandbox.v1.RestoreRequest
+	8,  // 52: sandbox.v1.SandboxService.Create:output_type -> sandbox.v1.Sandbox
+	8,  // 53: sandbox.v1.SandboxService.Get:output_type -> sandbox.v1.Sandbox
+	10, // 54: sandbox.v1.SandboxService.List:output_type -> sandbox.v1.ListResponse
+	12, // 55: sandbox.v1.SandboxService.Destroy:output_type -> sandbox.v1.DestroyResponse
+	14, // 56: sandbox.v1.SandboxService.Keepalive:output_type -> sandbox.v1.KeepaliveResponse
+	27, // 57: sandbox.v1.SandboxService.Exec:output_type -> sandbox.v1.ExecOutput
+	27, // 58: sandbox.v1.SandboxService.Attach:output_type -> sandbox.v1.ExecOutput
+	29, // 59: sandbox.v1.SandboxService.Upload:output_type -> sandbox.v1.UploadResponse
+	31, // 60: sandbox.v1.SandboxService.Download:output_type -> sandbox.v1.DownloadChunk
+	33, // 61: sandbox.v1.SandboxService.Snapshot:output_type -> sandbox.v1.SnapshotRef
+	35, // 62: sandbox.v1.SandboxService.Fork:output_type -> sandbox.v1.ForkResponse
+	8,  // 63: sandbox.v1.SandboxService.Restore:output_type -> sandbox.v1.Sandbox
+	52, // [52:64] is the sub-list for method output_type
+	40, // [40:52] is the sub-list for method input_type
+	40, // [40:40] is the sub-list for extension type_name
+	40, // [40:40] is the sub-list for extension extendee
+	0,  // [0:40] is the sub-list for field type_name
 }
 
 func init() { file_sandbox_v1_sandbox_proto_init() }
@@ -1207,13 +2600,38 @@ func file_sandbox_v1_sandbox_proto_init() {
 	if File_sandbox_v1_sandbox_proto != nil {
 		return
 	}
+	file_sandbox_v1_sandbox_proto_msgTypes[13].OneofWrappers = []any{
+		(*ExecInput_Start)(nil),
+		(*ExecInput_Stdin)(nil),
+		(*ExecInput_Signal)(nil),
+		(*ExecInput_Ack)(nil),
+	}
+	file_sandbox_v1_sandbox_proto_msgTypes[16].OneofWrappers = []any{
+		(*ExecExit_ExitCode)(nil),
+		(*ExecExit_SignalNumber)(nil),
+	}
+	file_sandbox_v1_sandbox_proto_msgTypes[21].OneofWrappers = []any{}
+	file_sandbox_v1_sandbox_proto_msgTypes[23].OneofWrappers = []any{
+		(*AttachInput_Start)(nil),
+		(*AttachInput_Stdin)(nil),
+		(*AttachInput_Signal)(nil),
+		(*AttachInput_Ack)(nil),
+	}
+	file_sandbox_v1_sandbox_proto_msgTypes[24].OneofWrappers = []any{
+		(*ExecOutput_Started)(nil),
+		(*ExecOutput_Stdout)(nil),
+		(*ExecOutput_Stderr)(nil),
+		(*ExecOutput_Exited)(nil),
+		(*ExecOutput_StdinAck)(nil),
+		(*ExecOutput_Attached)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sandbox_v1_sandbox_proto_rawDesc), len(file_sandbox_v1_sandbox_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   25,
+			NumEnums:      3,
+			NumMessages:   39,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
