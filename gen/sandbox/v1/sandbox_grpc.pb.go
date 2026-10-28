@@ -36,6 +36,17 @@ const (
 // SandboxServiceClient is the client API for SandboxService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Request-ID contract for Create, Snapshot, Fork, and Restore:
+// The client must supply a nonempty ID once per logical operation and reuse it
+// across retries. The key is scoped to the authenticated caller and RPC method.
+// The same key with the same request refers to the existing operation: wait for
+// it if still pending, or replay its recorded outcome if complete. Do not start
+// another operation. Reusing the key with a different request is INVALID_ARGUMENT.
+// Completed records must be retained for at least 24 hours after completion;
+// unresolved records must remain until their outcomes are known. Retry protection
+// is guaranteed only while the record is retained. A replayed response describes
+// the original outcome and may be stale; use Get for current sandbox state.
 type SandboxServiceClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*Sandbox, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Sandbox, error)
@@ -44,7 +55,12 @@ type SandboxServiceClient interface {
 	Keepalive(ctx context.Context, in *KeepaliveRequest, opts ...grpc.CallOption) (*KeepaliveResponse, error)
 	Exec(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[ExecInput, ExecOutput], error)
 	Attach(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[AttachInput, ExecOutput], error)
+	// Publish the completed upload atomically and return success only afterward.
+	// Enforce overwrite=false atomically at publication, not just with an earlier
+	// existence check, so a concurrently created destination is not replaced.
 	Upload(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadChunk, UploadResponse], error)
+	// Completion requires a successful final gRPC status, not merely receipt of
+	// some chunks. No consistent snapshot is guaranteed during concurrent writes.
 	Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DownloadChunk], error)
 	Snapshot(ctx context.Context, in *SnapshotRequest, opts ...grpc.CallOption) (*SnapshotRef, error)
 	Fork(ctx context.Context, in *ForkRequest, opts ...grpc.CallOption) (*ForkResponse, error)
@@ -200,6 +216,17 @@ func (c *sandboxServiceClient) Restore(ctx context.Context, in *RestoreRequest, 
 // SandboxServiceServer is the server API for SandboxService service.
 // All implementations must embed UnimplementedSandboxServiceServer
 // for forward compatibility.
+//
+// Request-ID contract for Create, Snapshot, Fork, and Restore:
+// The client must supply a nonempty ID once per logical operation and reuse it
+// across retries. The key is scoped to the authenticated caller and RPC method.
+// The same key with the same request refers to the existing operation: wait for
+// it if still pending, or replay its recorded outcome if complete. Do not start
+// another operation. Reusing the key with a different request is INVALID_ARGUMENT.
+// Completed records must be retained for at least 24 hours after completion;
+// unresolved records must remain until their outcomes are known. Retry protection
+// is guaranteed only while the record is retained. A replayed response describes
+// the original outcome and may be stale; use Get for current sandbox state.
 type SandboxServiceServer interface {
 	Create(context.Context, *CreateRequest) (*Sandbox, error)
 	Get(context.Context, *GetRequest) (*Sandbox, error)
@@ -208,7 +235,12 @@ type SandboxServiceServer interface {
 	Keepalive(context.Context, *KeepaliveRequest) (*KeepaliveResponse, error)
 	Exec(grpc.BidiStreamingServer[ExecInput, ExecOutput]) error
 	Attach(grpc.BidiStreamingServer[AttachInput, ExecOutput]) error
+	// Publish the completed upload atomically and return success only afterward.
+	// Enforce overwrite=false atomically at publication, not just with an earlier
+	// existence check, so a concurrently created destination is not replaced.
 	Upload(grpc.ClientStreamingServer[UploadChunk, UploadResponse]) error
+	// Completion requires a successful final gRPC status, not merely receipt of
+	// some chunks. No consistent snapshot is guaranteed during concurrent writes.
 	Download(*DownloadRequest, grpc.ServerStreamingServer[DownloadChunk]) error
 	Snapshot(context.Context, *SnapshotRequest) (*SnapshotRef, error)
 	Fork(context.Context, *ForkRequest) (*ForkResponse, error)

@@ -234,6 +234,10 @@ func (ProcessSignal) EnumDescriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{3}
 }
 
+// UNSPECIFIED is treated as AUTO. AUTO selects the DIFF path; callers must
+// explicitly request FULL when they need the full-snapshot fallback.
+// Unrecognized or unsupported explicit modes must fail, without silently
+// switching modes. SnapshotRef.mode reports the actual FULL or DIFF mode.
 type SnapshotMode int32
 
 const (
@@ -506,17 +510,25 @@ func (x *EgressPolicy) GetAllowRules() []*EgressRule {
 	return nil
 }
 
-// Resource defaults; omitted timeout defaults; explicit zero timeouts rejected
 type CreateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TemplateId    string                 `protobuf:"bytes,1,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`                                                 // Which configured template to use
-	Resources     *ResourceLimits        `protobuf:"bytes,2,opt,name=resources,proto3" json:"resources,omitempty"`                                                                     // CPU, memory, and disk allocation
-	Env           map[string]string      `protobuf:"bytes,3,rep,name=env,proto3" json:"env,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`       // Env vars for sandbox commands
-	IdleTimeout   *durationpb.Duration   `protobuf:"bytes,4,opt,name=idle_timeout,json=idleTimeout,proto3" json:"idle_timeout,omitempty"`                                              // Allowed inactivity before cleanup
-	MaxLifetime   *durationpb.Duration   `protobuf:"bytes,5,opt,name=max_lifetime,json=maxLifetime,proto3" json:"max_lifetime,omitempty"`                                              // Max lifetime, even while active
-	Labels        map[string]string      `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // Caller metadata for organization/filtering
-	Egress        *EgressPolicy          `protobuf:"bytes,7,opt,name=egress,proto3" json:"egress,omitempty"`
-	RequestId     string                 `protobuf:"bytes,8,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	TemplateId string                 `protobuf:"bytes,1,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"` // Which configured template to use
+	// Omission selects the template's resource defaults. When supplied, vcpus,
+	// memory_mib, and disk_gib must all be greater than zero.
+	Resources *ResourceLimits   `protobuf:"bytes,2,opt,name=resources,proto3" json:"resources,omitempty"`
+	Env       map[string]string `protobuf:"bytes,3,rep,name=env,proto3" json:"env,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // Env vars for sandbox commands
+	// Allowed inactivity before cleanup; defaults to 10 minutes when omitted.
+	// A supplied duration must be positive; explicit zero is rejected.
+	IdleTimeout *durationpb.Duration `protobuf:"bytes,4,opt,name=idle_timeout,json=idleTimeout,proto3" json:"idle_timeout,omitempty"`
+	// Maximum lifetime, even while active; defaults to 24 hours when omitted.
+	// A supplied duration must be positive; explicit zero is rejected.
+	MaxLifetime *durationpb.Duration `protobuf:"bytes,5,opt,name=max_lifetime,json=maxLifetime,proto3" json:"max_lifetime,omitempty"`
+	Labels      map[string]string    `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // Caller metadata for organization/filtering
+	Egress      *EgressPolicy        `protobuf:"bytes,7,opt,name=egress,proto3" json:"egress,omitempty"`
+	// Required nonempty client-generated ID, reused unchanged across retries of
+	// this request. See SandboxService's request-ID contract for scope, replay,
+	// conflicts, and retention.
+	RequestId     string `protobuf:"bytes,8,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1434,9 +1446,10 @@ func (x *ExecStarted) GetSessionId() string {
 }
 
 type OutputChunk struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Offset        uint64                 `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
-	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Offset uint64                 `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
+	// At most 64 KiB (65,536 bytes) per chunk.
+	Data          []byte `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1598,11 +1611,16 @@ func (*ExecExit_SignalNumber) isExecExit_Result() {}
 // When retransmitting, the client must resend the orignal chunk unchanged.
 // eof=true closes the process's stdin after that chunks bytes are written. Eof participates in seq too, so reconnecting cannot apply twice.
 // Closing the grpc connection does not close process stdin. Only the explicit EOF message does that.
+// The client may have only one new stdin chunk awaiting acknowledgement at a
+// time. It may still send output acknowledgements and signals while waiting.
+// The server must continue receiving those controls while a stdin pipe write
+// is blocked, so input backpressure cannot prevent output acknowledgements.
 type StdinChunk struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Sequence      uint64                 `protobuf:"varint,1,opt,name=sequence,proto3" json:"sequence,omitempty"`
-	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
-	Eof           bool                   `protobuf:"varint,3,opt,name=eof,proto3" json:"eof,omitempty"`
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Sequence uint64                 `protobuf:"varint,1,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	// At most 64 KiB (65,536 bytes) per chunk.
+	Data          []byte `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	Eof           bool   `protobuf:"varint,3,opt,name=eof,proto3" json:"eof,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2281,9 +2299,10 @@ func (x *UploadStart) GetOverwrite() bool {
 }
 
 type UploadData struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Offset        uint64                 `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
-	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Offset uint64                 `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
+	// At most 64 KiB (65,536 bytes) per chunk.
+	Data          []byte `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2519,9 +2538,10 @@ func (x *DownloadRequest) GetPath() string {
 }
 
 type DownloadChunk struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Offset        uint64                 `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
-	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Offset uint64                 `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
+	// At most 64 KiB (65,536 bytes) per chunk.
+	Data          []byte `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2571,10 +2591,13 @@ func (x *DownloadChunk) GetData() []byte {
 }
 
 type SnapshotRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
-	Mode          SnapshotMode           `protobuf:"varint,2,opt,name=mode,proto3,enum=sandbox.v1.SnapshotMode" json:"mode,omitempty"`
-	RequestId     string                 `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	SandboxId string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
+	Mode      SnapshotMode           `protobuf:"varint,2,opt,name=mode,proto3,enum=sandbox.v1.SnapshotMode" json:"mode,omitempty"`
+	// Required nonempty client-generated ID, reused unchanged across retries of
+	// this request. See SandboxService's request-ID contract for scope, replay,
+	// conflicts, and retention.
+	RequestId     string `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2739,9 +2762,12 @@ type ForkRequest struct {
 	Count             uint32                 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 	Mode              SnapshotMode           `protobuf:"varint,3,opt,name=mode,proto3,enum=sandbox.v1.SnapshotMode" json:"mode,omitempty"`
 	InheritedSessions InheritedSessionPolicy `protobuf:"varint,4,opt,name=inherited_sessions,json=inheritedSessions,proto3,enum=sandbox.v1.InheritedSessionPolicy" json:"inherited_sessions,omitempty"`
-	RequestId         string                 `protobuf:"bytes,5,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// Required nonempty client-generated ID, reused unchanged across retries of
+	// this request. See SandboxService's request-ID contract for scope, replay,
+	// conflicts, and retention.
+	RequestId     string `protobuf:"bytes,5,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ForkRequest) Reset() {
@@ -2865,9 +2891,12 @@ type RestoreRequest struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	SnapshotId        string                 `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
 	InheritedSessions InheritedSessionPolicy `protobuf:"varint,2,opt,name=inherited_sessions,json=inheritedSessions,proto3,enum=sandbox.v1.InheritedSessionPolicy" json:"inherited_sessions,omitempty"`
-	RequestId         string                 `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// Required nonempty client-generated ID, reused unchanged across retries of
+	// this request. See SandboxService's request-ID contract for scope, replay,
+	// conflicts, and retention.
+	RequestId     string `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RestoreRequest) Reset() {

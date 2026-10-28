@@ -36,6 +36,10 @@ enum ProcessSignal {
   PROCESS_SIGNAL_KILL = 3;
 }
 
+// UNSPECIFIED is treated as AUTO. AUTO selects the DIFF path; callers must
+// explicitly request FULL when they need the full-snapshot fallback.
+// Unrecognized or unsupported explicit modes must fail, without silently
+// switching modes. SnapshotRef.mode reports the actual FULL or DIFF mode.
 enum SnapshotMode {
   SNAPSHOT_MODE_UNSPECIFIED = 0;
   SNAPSHOT_MODE_AUTO = 1;
@@ -72,15 +76,23 @@ message EgressPolicy {
   repeated EgressRule allow_rules = 1;
 }
 
-// Resource defaults; omitted timeout defaults; explicit zero timeouts rejected
 message CreateRequest {
   string template_id = 1; // Which configured template to use
-  ResourceLimits resources = 2; // CPU, memory, and disk allocation
+  // Omission selects the template's resource defaults. When supplied, vcpus,
+  // memory_mib, and disk_gib must all be greater than zero.
+  ResourceLimits resources = 2;
   map<string, string> env = 3; // Env vars for sandbox commands
-  google.protobuf.Duration idle_timeout = 4; // Allowed inactivity before cleanup
-  google.protobuf.Duration max_lifetime = 5; // Max lifetime, even while active
+  // Allowed inactivity before cleanup; defaults to 10 minutes when omitted.
+  // A supplied duration must be positive; explicit zero is rejected.
+  google.protobuf.Duration idle_timeout = 4;
+  // Maximum lifetime, even while active; defaults to 24 hours when omitted.
+  // A supplied duration must be positive; explicit zero is rejected.
+  google.protobuf.Duration max_lifetime = 5;
   map<string, string> labels = 6; // Caller metadata for organization/filtering
   EgressPolicy egress = 7;
+  // Required nonempty client-generated ID, reused unchanged across retries of
+  // this request. See SandboxService's request-ID contract for scope, replay,
+  // conflicts, and retention.
   string request_id = 8;
 }
 
@@ -170,6 +182,7 @@ message ExecStarted {
 
 message OutputChunk {
   uint64 offset = 1;
+  // At most 64 KiB (65,536 bytes) per chunk.
   bytes data = 2;
 }
 
@@ -199,8 +212,13 @@ message ExecExit {
 // When retransmitting, the client must resend the orignal chunk unchanged.
 // eof=true closes the process's stdin after that chunks bytes are written. Eof participates in seq too, so reconnecting cannot apply twice.
 // Closing the grpc connection does not close process stdin. Only the explicit EOF message does that.
+// The client may have only one new stdin chunk awaiting acknowledgement at a
+// time. It may still send output acknowledgements and signals while waiting.
+// The server must continue receiving those controls while a stdin pipe write
+// is blocked, so input backpressure cannot prevent output acknowledgements.
 message StdinChunk {
   uint64 sequence = 1;
+  // At most 64 KiB (65,536 bytes) per chunk.
   bytes data = 2;
   bool eof = 3;
 }
@@ -272,6 +290,7 @@ message UploadStart {
 
 message UploadData {
   uint64 offset = 1;
+  // At most 64 KiB (65,536 bytes) per chunk.
   bytes data = 2;
 }
 
@@ -294,12 +313,16 @@ message DownloadRequest {
 
 message DownloadChunk {
   uint64 offset = 1;
+  // At most 64 KiB (65,536 bytes) per chunk.
   bytes data = 2;
 }
 
 message SnapshotRequest {
   string sandbox_id = 1;
   SnapshotMode mode = 2;
+  // Required nonempty client-generated ID, reused unchanged across retries of
+  // this request. See SandboxService's request-ID contract for scope, replay,
+  // conflicts, and retention.
   string request_id = 3;
 }
 
@@ -329,6 +352,9 @@ message ForkRequest {
   uint32 count = 2;
   SnapshotMode mode = 3;
   InheritedSessionPolicy inherited_sessions = 4;
+  // Required nonempty client-generated ID, reused unchanged across retries of
+  // this request. See SandboxService's request-ID contract for scope, replay,
+  // conflicts, and retention.
   string request_id = 5;
 }
 
@@ -340,9 +366,22 @@ message ForkResponse {
 message RestoreRequest {
   string snapshot_id = 1;
   InheritedSessionPolicy inherited_sessions = 2;
+  // Required nonempty client-generated ID, reused unchanged across retries of
+  // this request. See SandboxService's request-ID contract for scope, replay,
+  // conflicts, and retention.
   string request_id = 3;
 }
 
+// Request-ID contract for Create, Snapshot, Fork, and Restore:
+// The client must supply a nonempty ID once per logical operation and reuse it
+// across retries. The key is scoped to the authenticated caller and RPC method.
+// The same key with the same request refers to the existing operation: wait for
+// it if still pending, or replay its recorded outcome if complete. Do not start
+// another operation. Reusing the key with a different request is INVALID_ARGUMENT.
+// Completed records must be retained for at least 24 hours after completion;
+// unresolved records must remain until their outcomes are known. Retry protection
+// is guaranteed only while the record is retained. A replayed response describes
+// the original outcome and may be stale; use Get for current sandbox state.
 service SandboxService {
   rpc Create(CreateRequest) returns (Sandbox); // success means the new sandbox is ready to accept exec
   rpc Get(GetRequest) returns (Sandbox); // includes running and exited sessions
@@ -353,7 +392,12 @@ service SandboxService {
   rpc Exec(stream ExecInput) returns (stream ExecOutput); // client sends start + stdin + signals; server streams stdout/stderr chunks with byte offsets, then exit status.
   rpc Attach(stream AttachInput) returns (stream ExecOutput); // re-attach to a live exec session from a byte offset: after a client reconnect, or in a fork child.
 
-  rpc Upload(stream UploadChunk) returns (UploadResponse); // atomic upload publication; successful final download status required; no concurrent-write consistency guarantee
+  // Publish the completed upload atomically and return success only afterward.
+  // Enforce overwrite=false atomically at publication, not just with an earlier
+  // existence check, so a concurrently created destination is not replaced.
+  rpc Upload(stream UploadChunk) returns (UploadResponse);
+  // Completion requires a successful final gRPC status, not merely receipt of
+  // some chunks. No consistent snapshot is guaranteed during concurrent writes.
   rpc Download(DownloadRequest) returns (stream DownloadChunk);
 
   rpc Snapshot(SnapshotRequest) returns (SnapshotRef); // pause, capture memory + disk, resume
