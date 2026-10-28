@@ -43,6 +43,7 @@ enum SnapshotMode {
   SNAPSHOT_MODE_FULL = 3;
 }
 
+// Require explicit KEEP or KILL
 enum InheritedSessionPolicy {
   INHERITED_SESSION_POLICY_UNSPECIFIED = 0;
   INHERITED_SESSION_POLICY_KEEP = 1; // copied exec processes continue in the new sandbox. Their sessions start detached and can be reached through Attach.
@@ -71,6 +72,7 @@ message EgressPolicy {
   repeated EgressRule allow_rules = 1;
 }
 
+// Resource defaults; omitted timeout defaults; explicit zero timeouts rejected
 message CreateRequest {
   string template_id = 1; // Which configured template to use
   ResourceLimits resources = 2; // CPU, memory, and disk allocation
@@ -79,6 +81,7 @@ message CreateRequest {
   google.protobuf.Duration max_lifetime = 5; // Max lifetime, even while active
   map<string, string> labels = 6; // Caller metadata for organization/filtering
   EgressPolicy egress = 7;
+  string request_id = 8;
 }
 
 message GetRequest {
@@ -151,6 +154,7 @@ message ExecStart {
   google.protobuf.Duration timeout = 7; // optional command timeout
 }
 
+// First message must be start; reject subsequent starts and empty payloads
 message ExecInput {
   oneof payload {
     ExecStart start = 1;
@@ -179,6 +183,15 @@ message ExecExit {
   uint64 stderr_end_offset = 5;
 }
 
+// A reconnect should now look like this:
+//
+// Client processes stdout through byte 99.
+// Connection drops.
+// Client attaches with stdout_offset = 100.
+// Server replies with ExecAttached and its next stdin sequence.
+// Client resends any unacknowledged stdin chunks.
+// Server replays output starting at byte 100.
+
 // Sequences start at 1 and increase by one per chunk.
 // The guest accepts chunks in order into a bounded input queue.
 // next_sequence = 4 acks acceptance of seq 1, 2, and 3. It does not mean process has consumed those bytes.
@@ -200,20 +213,14 @@ message ExecSignal {
   ProcessSignal signal = 1;
 }
 
+// Offsets are cumulative and exclusive; retain output and exit status until acknowledged
 message ExecAck {
   uint64 stdout_offset = 1;
   uint64 stderr_offset = 2;
   bool exit_received = 3;
 }
 
-// A reconnect should now look like this:
-//
-// Client processes stdout through byte 99.
-// Connection drops.
-// Client attaches with stdout_offset = 100.
-// Server replies with ExecAttached and its next stdin sequence.
-// Client resends any unacknowledged stdin chunks.
-// Server replays output starting at byte 100.
+// Omitted offset selects oldest retained output; unavailable positions return OUT_OF_RANGE; successful attachment replaces the previous connection
 message AttachStart {
   string sandbox_id = 1;
   string session_id = 2;
@@ -228,6 +235,7 @@ message ExecAttached {
   uint64 stderr_offset = 4;
 }
 
+// First message must be start; reject subsequent starts and empty payloads
 message AttachInput {
   oneof payload {
     AttachStart start = 1;
@@ -292,6 +300,7 @@ message DownloadChunk {
 message SnapshotRequest {
   string sandbox_id = 1;
   SnapshotMode mode = 2;
+  string request_id = 3;
 }
 
 // id identifies a server-managed snapshot; it is not a host filesystem path.
@@ -320,6 +329,7 @@ message ForkRequest {
   uint32 count = 2;
   SnapshotMode mode = 3;
   InheritedSessionPolicy inherited_sessions = 4;
+  string request_id = 5;
 }
 
 message ForkResponse {
@@ -330,22 +340,23 @@ message ForkResponse {
 message RestoreRequest {
   string snapshot_id = 1;
   InheritedSessionPolicy inherited_sessions = 2;
+  string request_id = 3;
 }
 
 service SandboxService {
-  rpc Create(CreateRequest) returns (Sandbox);
+  rpc Create(CreateRequest) returns (Sandbox); // success means the new sandbox is ready to accept exec
   rpc Get(GetRequest) returns (Sandbox); // includes running and exited sessions
   rpc List(ListRequest) returns (ListResponse);
   rpc Destroy(DestroyRequest) returns (DestroyResponse);
   rpc Keepalive(KeepaliveRequest) returns (KeepaliveResponse);
 
-  rpc Exec(stream ExecInput) returns (stream ExecOutput); // Client sends start + stdin + signals; server streams stdout/stderr chunks with byte offsets, then exit status.
-  rpc Attach(stream AttachInput) returns (stream ExecOutput); // Re-attach to a live exec session from a byte offset: after a client reconnect, or in a fork child.
+  rpc Exec(stream ExecInput) returns (stream ExecOutput); // client sends start + stdin + signals; server streams stdout/stderr chunks with byte offsets, then exit status.
+  rpc Attach(stream AttachInput) returns (stream ExecOutput); // re-attach to a live exec session from a byte offset: after a client reconnect, or in a fork child.
 
-  rpc Upload(stream UploadChunk) returns (UploadResponse);
+  rpc Upload(stream UploadChunk) returns (UploadResponse); // atomic upload publication; successful final download status required; no concurrent-write consistency guarantee
   rpc Download(DownloadRequest) returns (stream DownloadChunk);
 
   rpc Snapshot(SnapshotRequest) returns (SnapshotRef); // pause, capture memory + disk, resume
   rpc Fork(ForkRequest) returns (ForkResponse); // n live children of a running sandbox
-  rpc Restore(RestoreRequest) returns (Sandbox); // new sandbox from a stored snapshot
+  rpc Restore(RestoreRequest) returns (Sandbox); // new sandbox from a stored snapshot, success means the new sandbox is ready to accept exec
 }

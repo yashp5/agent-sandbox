@@ -286,6 +286,7 @@ func (SnapshotMode) EnumDescriptor() ([]byte, []int) {
 	return file_sandbox_v1_sandbox_proto_rawDescGZIP(), []int{4}
 }
 
+// Require explicit KEEP or KILL
 type InheritedSessionPolicy int32
 
 const (
@@ -505,6 +506,7 @@ func (x *EgressPolicy) GetAllowRules() []*EgressRule {
 	return nil
 }
 
+// Resource defaults; omitted timeout defaults; explicit zero timeouts rejected
 type CreateRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TemplateId    string                 `protobuf:"bytes,1,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`                                                 // Which configured template to use
@@ -514,6 +516,7 @@ type CreateRequest struct {
 	MaxLifetime   *durationpb.Duration   `protobuf:"bytes,5,opt,name=max_lifetime,json=maxLifetime,proto3" json:"max_lifetime,omitempty"`                                              // Max lifetime, even while active
 	Labels        map[string]string      `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // Caller metadata for organization/filtering
 	Egress        *EgressPolicy          `protobuf:"bytes,7,opt,name=egress,proto3" json:"egress,omitempty"`
+	RequestId     string                 `protobuf:"bytes,8,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -595,6 +598,13 @@ func (x *CreateRequest) GetEgress() *EgressPolicy {
 		return x.Egress
 	}
 	return nil
+}
+
+func (x *CreateRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
 }
 
 type GetRequest struct {
@@ -1264,6 +1274,7 @@ func (x *ExecStart) GetTimeout() *durationpb.Duration {
 	return nil
 }
 
+// First message must be start; reject subsequent starts and empty payloads
 type ExecInput struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Types that are valid to be assigned to Payload:
@@ -1735,6 +1746,7 @@ func (x *ExecSignal) GetSignal() ProcessSignal {
 	return ProcessSignal_PROCESS_SIGNAL_UNSPECIFIED
 }
 
+// Offsets are cumulative and exclusive; retain output and exit status until acknowledged
 type ExecAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	StdoutOffset  uint64                 `protobuf:"varint,1,opt,name=stdout_offset,json=stdoutOffset,proto3" json:"stdout_offset,omitempty"`
@@ -1795,14 +1807,7 @@ func (x *ExecAck) GetExitReceived() bool {
 	return false
 }
 
-// A reconnect should now look like this:
-//
-// Client processes stdout through byte 99.
-// Connection drops.
-// Client attaches with stdout_offset = 100.
-// Server replies with ExecAttached and its next stdin sequence.
-// Client resends any unacknowledged stdin chunks.
-// Server replays output starting at byte 100.
+// Omitted offset selects oldest retained output; unavailable positions return OUT_OF_RANGE; successful attachment replaces the previous connection
 type AttachStart struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
@@ -1939,6 +1944,7 @@ func (x *ExecAttached) GetStderrOffset() uint64 {
 	return 0
 }
 
+// First message must be start; reject subsequent starts and empty payloads
 type AttachInput struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Types that are valid to be assigned to Payload:
@@ -2568,6 +2574,7 @@ type SnapshotRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
 	Mode          SnapshotMode           `protobuf:"varint,2,opt,name=mode,proto3,enum=sandbox.v1.SnapshotMode" json:"mode,omitempty"`
+	RequestId     string                 `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2614,6 +2621,13 @@ func (x *SnapshotRequest) GetMode() SnapshotMode {
 		return x.Mode
 	}
 	return SnapshotMode_SNAPSHOT_MODE_UNSPECIFIED
+}
+
+func (x *SnapshotRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
 }
 
 // id identifies a server-managed snapshot; it is not a host filesystem path.
@@ -2725,6 +2739,7 @@ type ForkRequest struct {
 	Count             uint32                 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 	Mode              SnapshotMode           `protobuf:"varint,3,opt,name=mode,proto3,enum=sandbox.v1.SnapshotMode" json:"mode,omitempty"`
 	InheritedSessions InheritedSessionPolicy `protobuf:"varint,4,opt,name=inherited_sessions,json=inheritedSessions,proto3,enum=sandbox.v1.InheritedSessionPolicy" json:"inherited_sessions,omitempty"`
+	RequestId         string                 `protobuf:"bytes,5,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -2787,6 +2802,13 @@ func (x *ForkRequest) GetInheritedSessions() InheritedSessionPolicy {
 	return InheritedSessionPolicy_INHERITED_SESSION_POLICY_UNSPECIFIED
 }
 
+func (x *ForkRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
 type ForkResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Snapshot      *SnapshotRef           `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
@@ -2843,6 +2865,7 @@ type RestoreRequest struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	SnapshotId        string                 `protobuf:"bytes,1,opt,name=snapshot_id,json=snapshotId,proto3" json:"snapshot_id,omitempty"`
 	InheritedSessions InheritedSessionPolicy `protobuf:"varint,2,opt,name=inherited_sessions,json=inheritedSessions,proto3,enum=sandbox.v1.InheritedSessionPolicy" json:"inherited_sessions,omitempty"`
+	RequestId         string                 `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -2891,6 +2914,13 @@ func (x *RestoreRequest) GetInheritedSessions() InheritedSessionPolicy {
 	return InheritedSessionPolicy_INHERITED_SESSION_POLICY_UNSPECIFIED
 }
 
+func (x *RestoreRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
 var File_sandbox_v1_sandbox_proto protoreflect.FileDescriptor
 
 const file_sandbox_v1_sandbox_proto_rawDesc = "" +
@@ -2909,7 +2939,7 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\bprotocol\x18\x03 \x01(\x0e2\x1b.sandbox.v1.NetworkProtocolR\bprotocol\"G\n" +
 	"\fEgressPolicy\x127\n" +
 	"\vallow_rules\x18\x01 \x03(\v2\x16.sandbox.v1.EgressRuleR\n" +
-	"allowRules\"\x80\x04\n" +
+	"allowRules\"\x9f\x04\n" +
 	"\rCreateRequest\x12\x1f\n" +
 	"\vtemplate_id\x18\x01 \x01(\tR\n" +
 	"templateId\x128\n" +
@@ -2918,7 +2948,9 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\fidle_timeout\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\vidleTimeout\x12<\n" +
 	"\fmax_lifetime\x18\x05 \x01(\v2\x19.google.protobuf.DurationR\vmaxLifetime\x12=\n" +
 	"\x06labels\x18\x06 \x03(\v2%.sandbox.v1.CreateRequest.LabelsEntryR\x06labels\x120\n" +
-	"\x06egress\x18\a \x01(\v2\x18.sandbox.v1.EgressPolicyR\x06egress\x1a6\n" +
+	"\x06egress\x18\a \x01(\v2\x18.sandbox.v1.EgressPolicyR\x06egress\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\b \x01(\tR\trequestId\x1a6\n" +
 	"\bEnvEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a9\n" +
@@ -3084,11 +3116,13 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"\x04path\x18\x02 \x01(\tR\x04path\";\n" +
 	"\rDownloadChunk\x12\x16\n" +
 	"\x06offset\x18\x01 \x01(\x04R\x06offset\x12\x12\n" +
-	"\x04data\x18\x02 \x01(\fR\x04data\"^\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\"}\n" +
 	"\x0fSnapshotRequest\x12\x1d\n" +
 	"\n" +
 	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12,\n" +
-	"\x04mode\x18\x02 \x01(\x0e2\x18.sandbox.v1.SnapshotModeR\x04mode\"\xb7\x02\n" +
+	"\x04mode\x18\x02 \x01(\x0e2\x18.sandbox.v1.SnapshotModeR\x04mode\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x03 \x01(\tR\trequestId\"\xb7\x02\n" +
 	"\vSnapshotRef\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12*\n" +
 	"\x11source_sandbox_id\x18\x02 \x01(\tR\x0fsourceSandboxId\x129\n" +
@@ -3098,20 +3132,24 @@ const file_sandbox_v1_sandbox_proto_rawDesc = "" +
 	"templateId\x128\n" +
 	"\tresources\x18\x05 \x01(\v2\x1a.sandbox.v1.ResourceLimitsR\tresources\x12,\n" +
 	"\x04mode\x18\x06 \x01(\x0e2\x18.sandbox.v1.SnapshotModeR\x04mode\x12(\n" +
-	"\x10base_snapshot_id\x18\a \x01(\tR\x0ebaseSnapshotId\"\xc3\x01\n" +
+	"\x10base_snapshot_id\x18\a \x01(\tR\x0ebaseSnapshotId\"\xe2\x01\n" +
 	"\vForkRequest\x12\x1d\n" +
 	"\n" +
 	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\rR\x05count\x12,\n" +
 	"\x04mode\x18\x03 \x01(\x0e2\x18.sandbox.v1.SnapshotModeR\x04mode\x12Q\n" +
-	"\x12inherited_sessions\x18\x04 \x01(\x0e2\".sandbox.v1.InheritedSessionPolicyR\x11inheritedSessions\"t\n" +
+	"\x12inherited_sessions\x18\x04 \x01(\x0e2\".sandbox.v1.InheritedSessionPolicyR\x11inheritedSessions\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x05 \x01(\tR\trequestId\"t\n" +
 	"\fForkResponse\x123\n" +
 	"\bsnapshot\x18\x01 \x01(\v2\x17.sandbox.v1.SnapshotRefR\bsnapshot\x12/\n" +
-	"\bchildren\x18\x02 \x03(\v2\x13.sandbox.v1.SandboxR\bchildren\"\x84\x01\n" +
+	"\bchildren\x18\x02 \x03(\v2\x13.sandbox.v1.SandboxR\bchildren\"\xa3\x01\n" +
 	"\x0eRestoreRequest\x12\x1f\n" +
 	"\vsnapshot_id\x18\x01 \x01(\tR\n" +
 	"snapshotId\x12Q\n" +
-	"\x12inherited_sessions\x18\x02 \x01(\x0e2\".sandbox.v1.InheritedSessionPolicyR\x11inheritedSessions*\xd0\x01\n" +
+	"\x12inherited_sessions\x18\x02 \x01(\x0e2\".sandbox.v1.InheritedSessionPolicyR\x11inheritedSessions\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x03 \x01(\tR\trequestId*\xd0\x01\n" +
 	"\fSandboxState\x12\x1d\n" +
 	"\x19SANDBOX_STATE_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15SANDBOX_STATE_PENDING\x10\x01\x12\x19\n" +
